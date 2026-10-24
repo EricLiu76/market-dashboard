@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Market Summary Dashboard</title>
+<meta name="description" content="Daily market summary: broad market indices, stocks and commodities with 52-week, 200-day and volatility signals, plus an earnings calendar.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232b6cd4'/%3E%3Cpath d='M6 22l6-7 5 4 9-10' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<style>
+:root {
+  color-scheme: light;
+  --color-bg: #faf9f5;
+  --color-panel: #ffffff;
+  --color-fg: #1f1e1d;
+  --color-fg-muted: #6f6e69;
+  --color-border-line: #e6e3da;
+  --color-ok: #2e7d4f;
+  --color-bad: #c2412d;
+  --color-warn: #a86412;
+  --series-1: #2b6cd4; --series-2: #d9731f; --series-3: #12938c; --series-4: #b8950f;
+  --series-5: #c03d8f; --series-6: #3b8a3e; --series-7: #7552cc; --series-8: #cf3f3f;
+  --cds-chart-grid: rgba(31, 30, 29, .08);
+  --cds-chart-axis: #b9b6ad;
+  --cds-chart-reference: #a19e95;
+  --cds-surface-popover: #ffffff;
+  --cds-border: rgba(31, 30, 29, .14);
+  --cds-shadow-popover: 0 8px 24px #0000001f, 0 2px 6px #00000014;
+  --cds-text-secondary: #6f6e69;
+  --wash-1: rgba(31, 30, 29, .04);
+  --wash-2: rgba(31, 30, 29, .09);
+
+  --font-anthropic-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-anthropic-serif: ui-serif, Georgia, "Times New Roman", serif;
+  --cds-font-size-caption: .75rem;
+  --cds-font-size-body: .875rem;
+  --cds-font-size-heading: .9375rem;
+  --cds-font-size-title: 1.375rem;
+  --cds-font-weight-medium: 500;
+  --cds-gap-xs: .375rem; --cds-gap-sm: .5rem; --cds-gap-md: .75rem; --cds-gap-lg: 1.25rem; --cds-gap-xl: 2rem;
+  --cds-pad-xs: .25rem; --cds-pad-sm: .5rem; --cds-pad-md: .75rem; --cds-pad-lg: 1rem;
+  --cds-radius: .5rem;
+  --cds-dur-slow: .45s;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --color-bg: #1c1b1a;
+    --color-panel: #262523;
+    --color-fg: #f3f1ea;
+    --color-fg-muted: #a6a39b;
+    --color-border-line: #3a3835;
+    --color-ok: #5fbf84;
+    --color-bad: #ef7a64;
+    --color-warn: #e3a245;
+    --series-1: #5b95f2; --series-2: #ef9147; --series-3: #33bdb3; --series-4: #dcbc3e;
+    --series-5: #e06bb6; --series-6: #62b865; --series-7: #9b80ec; --series-8: #ee6a6a;
+    --cds-chart-grid: rgba(255, 255, 255, .08);
+    --cds-chart-axis: #5d5a55;
+    --cds-chart-reference: #77736c;
+    --cds-surface-popover: #2e2d2a;
+    --cds-border: rgba(255, 255, 255, .14);
+    --cds-shadow-popover: 0 8px 24px #00000052, 0 2px 6px #0003;
+    --cds-text-secondary: #a6a39b;
+    --wash-1: rgba(255, 255, 255, .04);
+    --wash-2: rgba(255, 255, 255, .09);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-bg: #1c1b1a;
+  --color-panel: #262523;
+  --color-fg: #f3f1ea;
+  --color-fg-muted: #a6a39b;
+  --color-border-line: #3a3835;
+  --color-ok: #5fbf84;
+  --color-bad: #ef7a64;
+  --color-warn: #e3a245;
+  --series-1: #5b95f2; --series-2: #ef9147; --series-3: #33bdb3; --series-4: #dcbc3e;
+  --series-5: #e06bb6; --series-6: #62b865; --series-7: #9b80ec; --series-8: #ee6a6a;
+  --cds-chart-grid: rgba(255, 255, 255, .08);
+  --cds-chart-axis: #5d5a55;
+  --cds-chart-reference: #77736c;
+  --cds-surface-popover: #2e2d2a;
+  --cds-border: rgba(255, 255, 255, .14);
+  --cds-shadow-popover: 0 8px 24px #00000052, 0 2px 6px #0003;
+  --cds-text-secondary: #a6a39b;
+  --wash-1: rgba(255, 255, 255, .04);
+  --wash-2: rgba(255, 255, 255, .09);
+}
+
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-anthropic-sans);
+  font-size: var(--cds-font-size-body);
+  line-height: 1.45;
+}
+.shell { box-sizing: border-box; max-width: 1680px; margin: 0 auto; padding: 1.5rem clamp(16px, 3vw, 2.5rem) 2.5rem; display: grid; gap: var(--cds-gap-xl); }
+#dash-root { min-width: 0; }
+#dash-root .dash-skeleton {
+  color: transparent;
+  border-radius: var(--cds-radius);
+  background: linear-gradient(90deg, var(--wash-1) 25%, var(--wash-2) 50%, var(--wash-1) 75%);
+  background-size: 200% 100%;
+  animation: dash-shimmer 1.4s ease-in-out infinite;
+}
+@keyframes dash-shimmer { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+@media (prefers-reduced-motion: reduce) { #dash-root .dash-skeleton { animation: none; } }
+.dash-boot { min-height: 60vh; }
+.dash-fail, .shell-foot { margin: 0; color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+.shell-foot { border-top: 1px solid var(--color-border-line); padding-top: var(--cds-pad-md); }
+.shell-foot a { color: inherit; text-underline-offset: 2px; }
+</style>
+</head>
+<body>
+<main class="shell">
+  <div id="dash-root"><div class="dash-boot dash-skeleton" aria-label="Loading"></div></div>
+  <p class="shell-foot">Data from Wind Terminal, Yahoo Finance and Nasdaq.com (Zacks), updated when the owner refreshes it; for information only, not investment advice. Source and pipeline: <a href="https://github.com/EricLiu76/market-dashboard">github.com/EricLiu76/market-dashboard</a>.</p>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script src="dash-shim.js"></script>
+</body>
+</html>

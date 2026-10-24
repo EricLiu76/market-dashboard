@@ -1,0 +1,41 @@
+code,name,type,subtype,region,currency,unit,frequency,field,calendar,adjust,source,headline,chg_type,earnings_session
+SPX.GI,S&P 500,Broad Market Index,Global Markets,US,USD,pts,D,close,NYSE,,wind,Y,pct,
+DJI.GI,Dow Jones,Broad Market Index,Global Markets,US,USD,pts,D,close,NYSE,,wind,N,pct,
+IXIC.GI,Nasdaq Composite,Broad Market Index,Global Markets,US,USD,pts,D,close,NASDAQ,,wind,Y,pct,
+VIX.GI,CBOE VIX,Broad Market Index,Global Markets,US,USD,pts,D,close,CBOE,,wind,N,pct,
+KS11.GI,KOSPI,Broad Market Index,Asian Markets,Korea,KRW,pts,D,close,KSE,,wind,N,pct,
+N225.GI,Nikkei 225,Broad Market Index,Asian Markets,Japan,JPY,pts,D,close,TSE,,wind,N,pct,
+TPX.GI,TOPIX,Broad Market Index,Asian Markets,Japan,JPY,pts,D,close,TSE,,wind,N,pct,
+HSI.HI,Hang Seng Index,Broad Market Index,Asian Markets,Hong Kong,HKD,pts,D,close,HKEX,,wind,Y,pct,
+000300.SH,CSI 300,Broad Market Index,Asian Markets,China,CNY,pts,D,close,SSE,,wind,N,pct,
+AS51.GI,S&P/ASX 200,Broad Market Index,Asian Markets,Australia,AUD,pts,D,close,ASX,,wind,N,pct,
+FTSE.GI,FTSE 100,Broad Market Index,EMEA Markets,UK,GBP,pts,D,close,LSE,,wind,N,pct,
+GDAXI.GI,DAX,Broad Market Index,EMEA Markets,Germany,EUR,pts,D,close,XETRA,,wind,N,pct,
+FCHI.GI,CAC 40,Broad Market Index,EMEA Markets,France,EUR,pts,D,close,EPA,,wind,N,pct,
+FTSEMIB.FI,FTSE MIB,Broad Market Index,EMEA Markets,Italy,EUR,pts,D,close,OWN,,wind,N,pct,
+IBEX.GI,IBEX 35,Broad Market Index,EMEA Markets,Spain,EUR,pts,D,close,OWN,,wind,N,pct,
+SXXP.GI,STOXX Europe 600,Broad Market Index,EMEA Markets,Europe,EUR,pts,D,close,OWN,,wind,N,pct,
+ASE.GI,Athens General (ASE),Broad Market Index,EMEA Markets,Greece,EUR,pts,D,close,ASE,,wind,N,pct,
+892000.MI,MSCI EM Latin America,Broad Market Index,LATAM Markets,Latin America,USD,pts,D,close,OWN,,wind,N,pct,
+IBOVESPA.GI,Bovespa,Broad Market Index,LATAM Markets,Brazil,BRL,pts,D,close,B3,,wind,N,pct,
+MXX.GI,IPC Mexico,Broad Market Index,LATAM Markets,Mexico,MXN,pts,D,close,BMV,,wind,N,pct,
+NVDA.O,NVIDIA,Equity Stock,,US,USD,USD,D,close,NASDAQ,F,wind,Y,pct,AMC
+COHR.N,Coherent,Equity Stock,,US,USD,USD,D,close,NYSE,F,wind,Y,pct,AMC
+LITE.O,Lumentum,Equity Stock,,US,USD,USD,D,close,NASDAQ,F,wind,N,pct,AMC
+AAOI.O,Applied Optoelectronics,Equity Stock,,US,USD,USD,D,close,NASDAQ,F,wind,N,pct,AMC
+MRVL.O,Marvell Technology,Equity Stock,,US,USD,USD,D,close,NASDAQ,F,wind,N,pct,AMC
+AVGO.O,Broadcom,Equity Stock,,US,USD,USD,D,close,NASDAQ,F,wind,N,pct,AMC
+GOOG.O,Alphabet (Class C),Equity Stock,,US,USD,USD,D,close,NASDAQ,F,wind,N,pct,AMC
+META.O,Meta Platforms,Equity Stock,,US,USD,USD,D,close,NASDAQ,F,wind,N,pct,AMC
+MSFT.O,Microsoft,Equity Stock,,US,USD,USD,D,close,NASDAQ,F,wind,N,pct,AMC
+AMZN.O,Amazon,Equity Stock,,US,USD,USD,D,close,NASDAQ,F,wind,N,pct,AMC
+SPCX.O,SpaceX,Equity Stock,,US,USD,USD,D,close,NASDAQ,F,wind,N,pct,AMC
+ORCL.N,Oracle,Equity Stock,,US,USD,USD,D,close,NYSE,F,wind,N,pct,AMC
+NBIS.O,Nebius,Equity Stock,,US,USD,USD,D,close,NASDAQ,F,wind,N,pct,BMO
+CRWV.O,CoreWeave,Equity Stock,,US,USD,USD,D,close,NASDAQ,F,wind,N,pct,AMC
+IREN.O,IREN,Equity Stock,,US,USD,USD,D,close,NASDAQ,F,wind,N,pct,AMC
+GC.CMX,Gold,Commodities,,Global,USD,USD/oz,D,close,COMEX,,wind,Y,pct,
+SI.CMX,Silver,Commodities,,Global,USD,USD/oz,D,close,COMEX,,wind,N,pct,
+HG.CMX,Copper,Commodities,,Global,USD,USD/lb,D,close,COMEX,,wind,N,pct,
+CL.NYM,WTI Crude,Commodities,,Global,USD,USD/bbl,D,close,NYMEX,,wind,N,pct,
+B.IPE,Brent Crude,Commodities,,Global,USD,USD/bbl,D,close,ICE,,wind,Y,pct,
