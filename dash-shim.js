@@ -20,14 +20,14 @@
     ({ status, data, rows: data, value: data, columns, message, refreshing: false, meta: [] });
   const noBom = (text) => text.replace(/^﻿/, '');
 
-  // master_data_file.csv: rows 1-8 describe each column (type, name, code, frequency, field, currency,
-  // unit, source), row 10 is "date" plus names, data from row 11. Gives the rows master_data_long.csv holds.
+  // master_data_file.csv: the rows above "date" describe each column (type, name, code, frequency, field,
+  // currency, unit), then "date" plus names, then the data. Gives one row per date and column.
   function wideToLong(text) {
     const rows = d3.csvParseRows(noBom(text));
     const meta = {};
     let i = 0;
     for (; i < rows.length && rows[i][0] !== 'date'; i++) if (rows[i][0]) meta[rows[i][0]] = rows[i];
-    const keys = ['type', 'name', 'code', 'frequency', 'field', 'currency', 'unit', 'source'];
+    const keys = ['type', 'name', 'code', 'frequency', 'field', 'currency', 'unit'];
     const out = [];
     for (const r of rows.slice(i + 1)) {
       if (!r[0]) continue;
@@ -38,7 +38,7 @@
         out.push(o);
       }
     }
-    return { rows: out, columns: ['date', 'frequency', 'code', 'name', 'type', 'field', 'value', 'unit', 'currency', 'source'] };
+    return { rows: out, columns: ['date', 'frequency', 'code', 'name', 'type', 'field', 'value', 'unit', 'currency'] };
   }
 
   // ---------- datasets ----------

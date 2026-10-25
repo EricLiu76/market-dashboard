@@ -227,7 +227,7 @@
     </div>
   </section>
 
-  <p class="mk-note">Source: Wind Terminal daily closes, built by build_data.py from universe.csv. Stock prices are forward-adjusted for splits and dividends. On each card the dashed line is the level at the start of the range, and the bar shows where the latest close sits in its 52-week range. σ is the latest daily move divided by the standard deviation of the previous 60 daily moves.</p>
+  <p class="mk-note">Daily closes. Stock prices are forward-adjusted for splits and dividends. On each card the dashed line is the level at the start of the range, and the bar shows where the latest close sits in its 52-week range. σ is the latest daily move divided by the standard deviation of the previous 60 daily moves.</p>
   </div>
 
   <div class="cal" id="calendar" role="tabpanel" aria-labelledby="tab-calendar" hidden>
@@ -276,7 +276,7 @@
         </section>
       </aside>
     </div>
-    <p class="mk-note">Equity: dates from Wind (reported dates, or Wind's expected date for the next report). An upcoming date shows (Confirmed) once the company has announced it, per Nasdaq.com (Zacks); the announced date replaces Wind's if they differ. Otherwise it shows (Estimate), and Nasdaq's estimate fills in where Wind has no date. Reported dates show (Confirmed). Actual revenue and GAAP diluted EPS from Wind; all consensus figures (quarterly and fiscal-year revenue and adjusted EPS) and the EPS beat or miss from Yahoo Finance. Before the open or after the close is set in universe.csv. Times are Singapore time, with US daylight saving applied.</p>
+    <p class="mk-note">Equity: an upcoming date shows (Confirmed) once the company has announced it, otherwise (Estimate); reported dates show (Confirmed). Consensus covers quarterly and fiscal-year revenue and adjusted EPS, and the beat or miss compares adjusted EPS with consensus. Times are Singapore time, with US daylight saving applied.</p>
   </div>
 </div>
 
@@ -570,7 +570,7 @@
       const head = el('div', 'mk-sec-head');
       head.append(el('h2', null, type), el('span', 'mk-note', rs.length + (rs.length === 1 ? ' chart' : ' charts')));
       sec.append(head);
-      // Optional sub-headings (subtype), in universe.csv order
+      // Optional sub-headings (subtype), in file order
       d3.group(rs, (r) => r.subtype || '').forEach((srs, sub) => {
         if (sub) { const sh = el('h3', 'mk-sub-head', sub); sh.id = 'sub-' + safeId(type + sub); sec.append(sh); }
         const grid = el('div', 'mk-cards');
@@ -609,7 +609,7 @@
     const head = el('div', 'mk-d-head');
     const titles = el('div');
     const meta = el('div', 'mk-note');
-    meta.append(r.code + ' · ' + r.type + ' · ' + r.source + ' · latest ', mark(el('span', null, fmtDate(parseDay(r.as_of))), 'as_of', r.code), ' · ', r.type === 'Commodities' && r.unit ? mark(el('span', null, r.unit), 'unit', r.code) : mark(el('span', null, r.currency), 'currency', r.code));
+    meta.append(r.code + ' · ' + r.type + ' · latest ',mark(el('span', null, fmtDate(parseDay(r.as_of))), 'as_of', r.code), ' · ', r.type === 'Commodities' && r.unit ? mark(el('span', null, r.unit), 'unit', r.code) : mark(el('span', null, r.currency), 'currency', r.code));
     titles.append(el('h2', null, r.name), meta);
     const close = el('button', 'mk-close', 'Close'); close.type = 'button';
     close.addEventListener('click', () => dash.setParams({ open: null, cmp: null }));
@@ -910,11 +910,10 @@
     dl.append(d);
   }
   // "low to high · n analysts · source" under a consensus figure
-  const consSubs = (e, id, lo, hi, n, fmt, source) => {
+  const consSubs = (e, id, lo, hi, n, fmt) => {
     const subs = [];
-    if (e[lo] != null && e[hi] != null) subs.push(mark(el('span', null, fmt(e[lo])), lo, id), ' to ', mark(el('span', null, fmt(e[hi])), hi, id), ' · ');
-    if (e[n] != null) subs.push(mark(el('span', null, String(e[n])), n, id), ' analysts · ');
-    subs.push(source);
+    if (e[lo] != null && e[hi] != null) subs.push(mark(el('span', null, fmt(e[lo])), lo, id), ' to ', mark(el('span', null, fmt(e[hi])), hi, id));
+    if (e[n] != null) subs.push(subs.length ? ' · ' : '', mark(el('span', null, String(e[n])), n, id), ' analysts');
     return subs;
   };
 
@@ -931,38 +930,29 @@
     const time = el('div', 'cal-time');
     if (big) time.append(el('b', null, big));
     if (e.date_status) time.append(dst(e, id));
-    const dsrc = el('span', null, rest + ' · Date: ');
-    dsrc.append(mark(el('span', null, e.date_source), 'date_source', id));
-    if (e.date_status_source) dsrc.append(' · status: ', mark(el('span', null, e.date_status_source), 'date_status_source', id));
-    time.append(dsrc);
-    if (e.date_yahoo) {
-      const y = el('span', null, '· Yahoo shows ');
-      y.append(mark(el('span', null, fDay(parse(e.date_yahoo))), 'date_yahoo', id));
-      time.append(y);
-    }
+    time.append(el('span', null, rest));
 
     const dl = el('dl', 'cal-kv');
     const pe = mark(el('span', null, fYM(parse(e.period_end + '-01'))), 'period_end', id);
     if (e.status === 'Reported') {
-      if (e.rev_actual_bn != null) kv(dl, 'Revenue', mark(el('span', null, fBn(e.rev_actual_bn, e.currency)), 'rev_actual_bn', id), ['Wind']);
+      if (e.rev_actual_bn != null) kv(dl, 'Revenue', mark(el('span', null, fBn(e.rev_actual_bn, e.currency)), 'rev_actual_bn', id));
       if (e.eps_adj_actual != null) {
         const subs = [];
         if (e.eps_cons != null) subs.push('vs consensus ', mark(el('span', null, fEps(e.eps_cons)), 'eps_cons', id), ' ');
         if (e.eps_surprise_pct != null) subs.push(beat(e, id));
-        subs.push(' · Yahoo');
         kv(dl, 'Adjusted EPS', mark(el('span', null, fEps(e.eps_adj_actual)), 'eps_adj_actual', id), subs);
       }
-      if (e.eps_gaap != null) kv(dl, 'GAAP diluted EPS', mark(el('span', null, fEps(e.eps_gaap)), 'eps_gaap', id), ['Wind']);
+      if (e.eps_gaap != null) kv(dl, 'GAAP diluted EPS', mark(el('span', null, fEps(e.eps_gaap)), 'eps_gaap', id));
       kv(dl, 'Quarter ended', pe);
     } else {
       if (e.rev_cons_bn != null) kv(dl, 'Revenue consensus', mark(el('span', null, fBn(e.rev_cons_bn, e.currency)), 'rev_cons_bn', id),
-        consSubs(e, id, 'rev_cons_low_bn', 'rev_cons_high_bn', 'rev_cons_n', fBn, 'Yahoo'));
+        consSubs(e, id, 'rev_cons_low_bn', 'rev_cons_high_bn', 'rev_cons_n', fBn));
       if (e.eps_cons != null) kv(dl, 'EPS consensus (adjusted)', mark(el('span', null, fEps(e.eps_cons)), 'eps_cons', id),
-        consSubs(e, id, 'eps_cons_low', 'eps_cons_high', 'eps_cons_n', fEps, 'Yahoo'));
+        consSubs(e, id, 'eps_cons_low', 'eps_cons_high', 'eps_cons_n', fEps));
       if (e.fy_rev_cons_bn != null) kv(dl, e.fy_label + ' revenue consensus', mark(el('span', null, fBn(e.fy_rev_cons_bn, e.currency)), 'fy_rev_cons_bn', id),
-        consSubs(e, id, 'fy_rev_low_bn', 'fy_rev_high_bn', 'fy_rev_n', fBn, 'Yahoo'));
+        consSubs(e, id, 'fy_rev_low_bn', 'fy_rev_high_bn', 'fy_rev_n', fBn));
       if (e.fy_eps_cons != null) kv(dl, e.fy_label + ' EPS consensus (adjusted)', mark(el('span', null, fEps(e.fy_eps_cons)), 'fy_eps_cons', id),
-        consSubs(e, id, 'fy_eps_low', 'fy_eps_high', 'fy_eps_n', fEps, 'Yahoo'));
+        consSubs(e, id, 'fy_eps_low', 'fy_eps_high', 'fy_eps_n', fEps));
       kv(dl, 'Quarter ending', pe);
     }
     c.append(top, time, dl);
