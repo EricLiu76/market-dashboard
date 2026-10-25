@@ -38,7 +38,8 @@
 .mk-cd[aria-expanded="true"] { border-color: var(--color-fg); }
 .mk-cd-top { display: flex; align-items: baseline; gap: .5em; min-width: 0; }
 .mk-cd-name { font-weight: var(--cds-font-weight-medium); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.mk-code { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); letter-spacing: .02em; }
+.mk-code { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); letter-spacing: .02em; flex-shrink: 0; max-width: 40%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mk-cd-unit { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); white-space: nowrap; flex-shrink: 0; margin-left: auto; }
 .mk-cd-vals { display: flex; align-items: baseline; gap: .6em; flex-wrap: wrap; }
 .mk-big { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); line-height: 1.1; }
 .mk-cd-chg { font-weight: var(--cds-font-weight-medium); }
@@ -306,6 +307,7 @@
 (() => {
   const RANGES = [['1D', 'chg_1d'], ['1W', 'chg_1w'], ['1M', 'chg_1m'], ['3M', 'chg_3m'], ['6M', 'chg_6m'], ['YTD', 'chg_ytd'], ['1Y', 'chg_1y'], ['2Y', 'chg_2y'], ['3Y', 'chg_3y'], ['5Y', 'chg_5y']];
   const RF = Object.fromEntries(RANGES);
+  const PICK = RANGES.filter(([k]) => k !== '1D'); // range buttons; the last day's move is on every card
   const STATS = [['chg_1d', '1D'], ['chg_1w', '1W'], ['chg_1m', '1M'], ['chg_3m', '3M'], ['chg_6m', '6M'], ['chg_ytd', 'YTD'], ['chg_1y', '1Y'], ['chg_3y', '3Y'], ['chg_5y', '5Y']];
   const NUMS = ['last', 'chg_1d', 'chg_1w', 'chg_1m', 'chg_3m', 'chg_6m', 'chg_ytd', 'chg_1y', 'chg_2y', 'chg_3y', 'chg_5y',
     'ma50', 'ma200', 'vs_ma50', 'vs_ma200', 'high_52w', 'low_52w', 'from_high_52w', 'pos_52w', 'vol_20d', 'sigma_1d'];
@@ -313,6 +315,8 @@
   const P = () => {
     const p = { ...DEF };
     for (const [k, v] of Object.entries(dash.params() || {})) if (v != null) p[k] = v;
+    if (p.range === '1D') p.range = DEF.range;
+    if (p.drange === '1D') p.drange = null;
     return p;
   };
   const num = (v) => (v === '' || v == null ? null : Number(v));
@@ -525,7 +529,8 @@
     c.addEventListener('click', () => openDetail(r.code));
     c.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDetail(r.code); } });
 
-    const top = el('div', 'mk-cd-top'); top.append(el('span', 'mk-cd-name', r.name), el('span', 'mk-code', r.code));
+    const top = el('div', 'mk-cd-top'); top.append(el('span', 'mk-cd-name', r.name));
+    top.append(r.type === 'Commodities' && r.unit ? mark(el('span', 'mk-cd-unit', r.unit), 'unit', r.code) : el('span', 'mk-code', r.code));
     const vals = el('div', 'mk-cd-vals');
     vals.append(mark(el('span', 'mk-big', fmtLast(r)), 'last', r.code), mark(el('span', 'mk-cd-chg ' + tone(r, r[f]), fmtChg(r, r[f])), f, r.code));
     const spark = el('div', 'mk-spark'); spark.setAttribute('data-source', 'master');
@@ -604,7 +609,7 @@
     const head = el('div', 'mk-d-head');
     const titles = el('div');
     const meta = el('div', 'mk-note');
-    meta.append(r.code + ' · ' + r.type + ' · ' + r.source + ' · latest ', mark(el('span', null, fmtDate(parseDay(r.as_of))), 'as_of', r.code), ' · ', mark(el('span', null, r.currency), 'currency', r.code));
+    meta.append(r.code + ' · ' + r.type + ' · ' + r.source + ' · latest ', mark(el('span', null, fmtDate(parseDay(r.as_of))), 'as_of', r.code), ' · ', r.type === 'Commodities' && r.unit ? mark(el('span', null, r.unit), 'unit', r.code) : mark(el('span', null, r.currency), 'currency', r.code));
     titles.append(el('h2', null, r.name), meta);
     const close = el('button', 'mk-close', 'Close'); close.type = 'button';
     close.addEventListener('click', () => dash.setParams({ open: null, cmp: null }));
@@ -615,7 +620,7 @@
 
     const ctl = el('div', 'mk-bar');
     const seg = el('div', 'mk-seg'); seg.setAttribute('role', 'group'); seg.setAttribute('aria-label', 'Chart range');
-    segButtons(seg, RANGES.map(([k]) => [k, k]), range, (v) => dash.setParams({ drange: v }));
+    segButtons(seg, PICK.map(([k]) => [k, k]), range, (v) => dash.setParams({ drange: v }));
     const cmp = el('select'); cmp.id = 'cmp'; cmp.setAttribute('aria-label', 'Compare with');
     cmp.append(new Option('Compare with…', ''));
     d3.group(rows.filter((x) => x.code !== r.code), (x) => x.type).forEach((rs, type) => {
@@ -754,7 +759,7 @@
     // Hidden behind the Calendar tab: drawn when the tab opens, since charts need a width
     if (dash.params().tab === 'calendar') return;
     const p = P();
-    segButtons(document.getElementById('range'), RANGES.map(([k]) => [k, k]), p.range, (v) => dash.setParams({ range: v, drange: null }));
+    segButtons(document.getElementById('range'), PICK.map(([k]) => [k, k]), p.range, (v) => dash.setParams({ range: v, drange: null }));
     document.getElementById('spark200').setAttribute('aria-pressed', String(!!p.spark200));
     if (document.activeElement !== sortSel) sortSel.value = p.sort;
 
@@ -806,7 +811,8 @@
   const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
   const mark = (e, field, id) => { e.setAttribute('data-source', 'earnings'); e.setAttribute('data-field', field); e.setAttribute('data-where', 'event_id=' + encodeURIComponent(id)); return e; };
   const sign = (v) => (v > 0 ? '+' : v < 0 ? '−' : '');
-  const fBn = (v) => 'USD' + (v >= 10 ? v.toFixed(1) : v.toFixed(2)) + 'bn';
+  // Revenue is in the company's reporting currency (TWD for TSMC, KRW for SK hynix, EUR for Nokia)
+  const fBn = (v, ccy) => { const n = v >= 10 ? 1 : 2; return (ccy || 'USD') + v.toLocaleString('en-US', { minimumFractionDigits: n, maximumFractionDigits: n }) + 'bn'; };
   const fEps = (v) => v.toFixed(2);
   const beat = (e, id) => mark(el('span', 'cal-beat ' + (e.eps_surprise_pct >= 0 ? 'mk-up' : 'mk-down'),
     (e.eps_surprise_pct >= 0 ? 'Beat ' : 'Miss ') + sign(e.eps_surprise_pct) + Math.abs(e.eps_surprise_pct).toFixed(1) + '%'), 'eps_surprise_pct', id);
@@ -937,7 +943,7 @@
     const dl = el('dl', 'cal-kv');
     const pe = mark(el('span', null, fYM(parse(e.period_end + '-01'))), 'period_end', id);
     if (e.status === 'Reported') {
-      if (e.rev_actual_bn != null) kv(dl, 'Revenue', mark(el('span', null, fBn(e.rev_actual_bn)), 'rev_actual_bn', id), ['Wind']);
+      if (e.rev_actual_bn != null) kv(dl, 'Revenue', mark(el('span', null, fBn(e.rev_actual_bn, e.currency)), 'rev_actual_bn', id), ['Wind']);
       if (e.eps_adj_actual != null) {
         const subs = [];
         if (e.eps_cons != null) subs.push('vs consensus ', mark(el('span', null, fEps(e.eps_cons)), 'eps_cons', id), ' ');
@@ -948,11 +954,11 @@
       if (e.eps_gaap != null) kv(dl, 'GAAP diluted EPS', mark(el('span', null, fEps(e.eps_gaap)), 'eps_gaap', id), ['Wind']);
       kv(dl, 'Quarter ended', pe);
     } else {
-      if (e.rev_cons_bn != null) kv(dl, 'Revenue consensus', mark(el('span', null, fBn(e.rev_cons_bn)), 'rev_cons_bn', id),
+      if (e.rev_cons_bn != null) kv(dl, 'Revenue consensus', mark(el('span', null, fBn(e.rev_cons_bn, e.currency)), 'rev_cons_bn', id),
         consSubs(e, id, 'rev_cons_low_bn', 'rev_cons_high_bn', 'rev_cons_n', fBn, 'Yahoo'));
       if (e.eps_cons != null) kv(dl, 'EPS consensus (adjusted)', mark(el('span', null, fEps(e.eps_cons)), 'eps_cons', id),
         consSubs(e, id, 'eps_cons_low', 'eps_cons_high', 'eps_cons_n', fEps, 'Yahoo'));
-      if (e.fy_rev_cons_bn != null) kv(dl, e.fy_label + ' revenue consensus', mark(el('span', null, fBn(e.fy_rev_cons_bn)), 'fy_rev_cons_bn', id),
+      if (e.fy_rev_cons_bn != null) kv(dl, e.fy_label + ' revenue consensus', mark(el('span', null, fBn(e.fy_rev_cons_bn, e.currency)), 'fy_rev_cons_bn', id),
         consSubs(e, id, 'fy_rev_low_bn', 'fy_rev_high_bn', 'fy_rev_n', fBn, 'Yahoo'));
       if (e.fy_eps_cons != null) kv(dl, e.fy_label + ' EPS consensus (adjusted)', mark(el('span', null, fEps(e.fy_eps_cons)), 'fy_eps_cons', id),
         consSubs(e, id, 'fy_eps_low', 'fy_eps_high', 'fy_eps_n', fEps, 'Yahoo'));
@@ -1014,7 +1020,7 @@
       const sub = el('span', 'mk-small', (big ? big + ' ' : '') + rest.split(' · ')[0]);
       if (e.date_status) sub.append(dst(e, id));
       const cons = el('span', 'mk-small');
-      if (e.rev_cons_bn != null) cons.append('Rev ', mark(el('span', null, fBn(e.rev_cons_bn)), 'rev_cons_bn', id));
+      if (e.rev_cons_bn != null) cons.append('Rev ', mark(el('span', null, fBn(e.rev_cons_bn, e.currency)), 'rev_cons_bn', id));
       if (e.eps_cons != null) cons.append(e.rev_cons_bn != null ? ' · ' : '', 'EPS ', mark(el('span', null, fEps(e.eps_cons)), 'eps_cons', id));
       body.append(top, sub);
       if (cons.childNodes.length) body.append(cons);
@@ -1033,7 +1039,7 @@
       top.append(mark(el('span', 'cal-ticker', e.ticker), 'ticker', id), mark(el('span', 'cal-ev-title', e.fiscal_period), 'fiscal_period', id));
       if (e.eps_surprise_pct != null) { const s = beat(e, id); s.style.marginLeft = 'auto'; top.append(s); }
       const sub = el('span', 'mk-small');
-      if (e.rev_actual_bn != null) sub.append('Rev ', mark(el('span', null, fBn(e.rev_actual_bn)), 'rev_actual_bn', id));
+      if (e.rev_actual_bn != null) sub.append('Rev ', mark(el('span', null, fBn(e.rev_actual_bn, e.currency)), 'rev_actual_bn', id));
       if (e.eps_adj_actual != null) {
         sub.append(' · Adj. EPS ', mark(el('span', null, fEps(e.eps_adj_actual)), 'eps_adj_actual', id));
         if (e.eps_cons != null) sub.append(' vs ', mark(el('span', null, fEps(e.eps_cons)), 'eps_cons', id));

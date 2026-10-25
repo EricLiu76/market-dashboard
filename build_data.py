@@ -5,34 +5,51 @@ Outputs (in ./data):
                         currency, unit, source), a blank row, then one row per date and one
                         column per instrument. Weekly/monthly/quarterly/annual series go to
                         master_data_file_weekly/_monthly/_quarterly/_annual.csv in the same layout.
-  master_data_long.csv  the same data in long format (one row per date x instrument x field),
-                        read by the dashboard
+  master_data_long.csv  the same data in long format (one row per date x instrument x field)
+  master_dashboard.csv  the long format with only date, frequency, code, field and value: what the
+                        dashboard reads (its data files must stay under 8 MB)
   market_snapshot.csv   one row per instrument: latest value, 1D-5Y changes, 50/200-day averages,
                         52-week range, 20-day volatility and signals (see daily_stats)
   Market_Data.xlsx      Snapshot, Master (one sheet per frequency, same layout) and Universe sheets
   earnings_calendar.csv earnings dates and consensus for Equity Stock rows (see build_calendar.py)
+The files in ./data hold the last YEARS of history; the full history is in the archive below.
+
+Archive: archive/market_archive.parquet, one row per date x instrument x field (date, frequency,
+code, field, value, source, fetched = when the value was last fetched). Nothing is ever trimmed.
+Each run fetches a series only from OVERLAP days before its last archived date and merges that in;
+a new instrument gets history from HISTORY_START. If the re-fetched days differ from the archive (forward-adjusted
+prices after a dividend or split, or a revised value), the series' whole history is fetched again.
+The archive before the run is kept as market_archive.prev.parquet. The first run seeds the archive
+from master_data_long.csv. Instruments removed from universe.csv stay in the archive.
+
+  python build_data.py              normal run
+  python build_data.py --backfill   also fetch older history so every series reaches back to HISTORY_START
 
 universe.csv columns:
   code       Wind code (or Yahoo ticker when source = yahoo)
   type       grouping shown on the dashboard, e.g. Broad Market Index, Equity Stock, Macro
-  subtype    optional sub-heading within a type, e.g. Global Markets, Asian Markets; cards follow file order
+  subtype    optional sub-heading within a type, e.g. Global Markets, APAC Markets; cards follow file order
   frequency  D daily, W weekly, M monthly, Q quarterly, A annual
   field      Wind field to pull, e.g. close
   calendar   exchange trading calendar for Wind (NYSE, NASDAQ, CBOE, HKEX, SSE, TSE, KSE, ASX, LSE, XETRA, EPA,
              ASE, B3, BMV...); blank = Wind default (SSE); OWN = the series' own trading days, for markets
              Wind has no calendar for (Italy, Spain) and MSCI indices: weekdays, dropping days with no daily change
-  adjust     Wind PriceAdj: F forward-adjusted (stocks), blank = none (indices)
-  source     wind (WSD time series), wind_edb (macro series), yahoo
+  adjust     Wind PriceAdj: F forward-adjusted (stocks, ETFs), blank = none (indices)
+  source     wind (WSD time series), wind_edb (macro series), yahoo, eia (EIA daily spot price page;
+             code = EIA series id, e.g. EER_EPJK_PF4_RGC_DPG for US Gulf Coast jet fuel)
   headline   Y to show as a headline tile on the dashboard
   chg_type   pct (percent change) or bp (basis-point change, for yields)
   earnings_session  Equity Stock only: AMC (reports after the US close), BMO (before the open), blank = unknown
 
 Needs Wind Terminal open and logged in for Wind sources. If one instrument fails,
-its previous rows in master_data_file.csv are kept and the failure is printed.
+its archived history is kept and the failure is printed.
 """
 import csv
 import json
 import math
+import os
+import re
+import shutil
 import statistics
 import sys
 import urllib.parse
@@ -41,13 +58,24 @@ from collections import defaultdict
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
+import pyarrow as pa
+import pyarrow.parquet as pq
 from openpyxl import Workbook
 from openpyxl.styles import Font
 
 ROOT = Path(__file__).resolve().parent
 OUT = ROOT / "data"
 LONG = OUT / "master_data_long.csv"
-YEARS = 5
+DASH = OUT / "master_dashboard.csv"
+DASH_COLS = ["date", "frequency", "code", "field", "value"]
+ARCHIVE = ROOT / "archive" / "market_archive.parquet"
+ARCHIVE_SCHEMA = pa.schema([
+    ("date", pa.date32()), ("frequency", pa.string()), ("code", pa.string()), ("field", pa.string()),
+    ("value", pa.float64()), ("source", pa.string()), ("fetched", pa.date32()),
+])
+YEARS = 5  # history written to ./data
+HISTORY_START = date(2020, 1, 1)  # history fetched for a new instrument, and by --backfill
+OVERLAP = {"D": 30, "W": 70, "M": 190, "Q": 400, "A": 800}  # days re-fetched before the last archived date
 SGT = timezone(timedelta(hours=8))
 WIND_PERIOD = {"D": "D", "W": "W", "M": "M", "Q": "Q", "A": "Y"}
 MASTER_COLS = ["date", "frequency", "code", "name", "type", "field", "value", "unit", "currency", "source"]
@@ -99,7 +127,9 @@ def fetch_wind(u, begin, end):
     if u["adjust"]:
         opts.append(f"PriceAdj={u['adjust']}")
     fields = u["field"] + (",pct_chg" if own else "")
-    d = wind().wsd(u["code"], fields, begin.isoformat(), end.isoformat(), ";".join(opts))
+    # OWN starts 10 days early so the first requested day has a previous close to compare with
+    start = begin - timedelta(days=10) if own else begin
+    d = wind().wsd(u["code"], fields, start.isoformat(), end.isoformat(), ";".join(opts))
     if d.ErrorCode != 0:
         raise RuntimeError(f"Wind error {d.ErrorCode}: {d.Data}")
     if not own:
@@ -114,7 +144,7 @@ def fetch_wind(u, begin, end):
         if chg == 0 and out and out[-1][1] == v:
             continue
         out.append((as_date(t), v))
-    return out
+    return [(t, v) for t, v in out if t >= begin]
 
 
 def fetch_wind_edb(u, begin, end):
@@ -143,8 +173,113 @@ def fetch_yahoo(u, begin, end):
     return sorted(series.items())
 
 
-FETCH = {"wind": fetch_wind, "wind_edb": fetch_wind_edb, "yahoo": fetch_yahoo}
-SOURCE_LABEL = {"wind": "Wind", "wind_edb": "Wind EDB", "yahoo": "Yahoo"}
+def fetch_eia(u, begin, end):
+    # The daily history page has one row per week ("2026 Oct-19 to Oct-23") with Monday-Friday cells
+    if u["frequency"] != "D":
+        raise RuntimeError("eia source supports daily series only")
+    url = f"https://www.eia.gov/dnav/pet/hist/{u['code'].lower()}D.htm"
+    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+    with urllib.request.urlopen(req, timeout=60) as r:
+        page = r.read().decode("latin-1")
+    out = []
+    for label, cells in re.findall(r"<tr>\s*<td class='B6'>(.*?)</td>(.*?)</tr>", page, re.S):
+        monday = datetime.strptime(label.replace("&nbsp;", " ").split(" to ")[0].replace(" ", ""), "%Y%b-%d").date()
+        for i, v in enumerate(re.findall(r"<td class='B3'>([^<]*)</td>", cells)):
+            d = monday + timedelta(days=i)
+            if v.strip() and begin <= d <= end:
+                out.append((d, float(v)))
+    return out
+
+
+FETCH = {"wind": fetch_wind, "wind_edb": fetch_wind_edb, "yahoo": fetch_yahoo, "eia": fetch_eia}
+SOURCE_LABEL = {"wind": "Wind", "wind_edb": "Wind EDB", "yahoo": "Yahoo", "eia": "EIA"}
+
+
+def load_archive():
+    """{(code, field, frequency): {date: (value, source, fetched)}}"""
+    arc = defaultdict(dict)
+    if ARCHIVE.exists():
+        t = pq.read_table(ARCHIVE).to_pydict()
+        for d, freq, code, field, v, src, fetched in zip(*(t[c] for c in ARCHIVE_SCHEMA.names)):
+            arc[(code, field, freq)][d] = (v, src, fetched)
+    elif LONG.exists():
+        seeded = date.fromtimestamp(LONG.stat().st_mtime)
+        for r in read_csv(LONG):
+            arc[(r["code"], r["field"], r["frequency"])][date.fromisoformat(r["date"])] = (float(r["value"]), r["source"], seeded)
+        print(f"Archive started from {LONG.name}")
+    return arc
+
+
+def save_archive(arc):
+    # Written to a temporary file first, so a failed write never replaces the good archive
+    cols = {c: [] for c in ARCHIVE_SCHEMA.names}
+    for (code, field, freq), rows in sorted(arc.items()):
+        for d in sorted(rows):
+            v, src, fetched = rows[d]
+            for c, x in zip(ARCHIVE_SCHEMA.names, (d, freq, code, field, v, src, fetched)):
+                cols[c].append(x)
+    ARCHIVE.parent.mkdir(exist_ok=True)
+    tmp = ARCHIVE.with_name(ARCHIVE.name + ".tmp")
+    pq.write_table(pa.table(cols, schema=ARCHIVE_SCHEMA), tmp, compression="zstd")
+    if ARCHIVE.exists():
+        shutil.copyfile(ARCHIVE, ARCHIVE.with_name(ARCHIVE.stem + ".prev.parquet"))
+    os.replace(tmp, ARCHIVE)
+
+
+def differs(a, b):
+    return abs(a - b) > max(1.5e-4, 1e-6 * abs(b))
+
+
+def refresh(u, have, today, backfill):
+    """Fetch what the archive lacks for one instrument and merge it into `have` ({date: (value, source, fetched)}).
+    Returns a note for the log ("" for a routine update)."""
+    label = SOURCE_LABEL.get(u["source"], u["source"])
+
+    def get(begin, end=today):
+        return sorted(FETCH[u["source"].strip().lower()](u, begin, end))
+
+    def merge(new, start):
+        # The source's answer replaces everything archived from `start` on, so days it no longer has go too
+        for d in [d for d in have if d >= start]:
+            del have[d]
+        have.update({d: (round(v, 6), label, today) for d, v in new})
+
+    notes = []
+    if not have:
+        begin = HISTORY_START
+        new = get(begin)
+        if not new:
+            raise RuntimeError("no data returned")
+        merge(new, begin)
+        notes.append(f"new series, {len(new)} rows from {new[0][0]}")
+    else:
+        begin = max(have) - timedelta(days=OVERLAP[u["frequency"]])
+        new = get(begin)
+        if not new:
+            raise RuntimeError("no data returned")
+        changed = [d for d, v in new if d in have and differs(have[d][0], v)]
+        if not changed:
+            merge(new, begin)
+        else:
+            # Earlier values changed (forward-adjusted prices after a dividend or split, or a revision)
+            first = min(have)
+            new = get(first)
+            if not new:
+                raise RuntimeError("history changed but the re-fetch returned no data")
+            merge(new, new[0][0])
+            notes.append(f"history changed (seen from {changed[0]}); re-fetched {len(new)} rows from {new[0][0]}")
+            if new[0][0] - first > timedelta(days=14):
+                notes.append(f"rows before {new[0][0]} were not returned again and stay as archived")
+    if backfill:
+        first = min(have)
+        if first - HISTORY_START > timedelta(days=14):
+            try:
+                old = [(d, v) for d, v in get(HISTORY_START, first - timedelta(days=1)) if d < first]
+                have.update({d: (round(v, 6), label, today) for d, v in old})
+                notes.append(f"backfilled {len(old)} rows" + (f" from {old[0][0]}" if old else " (none earlier)"))
+            except Exception as e:
+                notes.append(f"backfill failed: {e}")
+    return "; ".join(notes)
 
 
 def value_on_or_before(series, target):
@@ -234,45 +369,40 @@ def read_csv(path):
 
 
 def main():
+    backfill = "--backfill" in sys.argv[1:]
     OUT.mkdir(exist_ok=True)
     universe = read_csv(ROOT / "universe.csv")
     today = datetime.now(SGT).date()
     begin = years_ago(today, YEARS) - timedelta(days=14)
+    arc = load_archive()
 
-    old = defaultdict(list)
-    for r in read_csv(LONG):
-        if set(MASTER_COLS) <= set(r):
-            old[(r["code"], r["field"], r["frequency"])].append(r)
-
-    master, snapshot, failed = [], [], []
+    master, snapshot, failed, notes = [], [], [], []
     for u in universe:
-        key = (u["code"], u["field"], u["frequency"])
+        have = arc[(u["code"], u["field"], u["frequency"])]
         try:
-            series = FETCH[u["source"].strip().lower()](u, begin, today)
-            if not series:
-                raise RuntimeError("no data returned")
-            rows = [
-                {
-                    "date": d.isoformat(), "frequency": u["frequency"], "code": u["code"], "name": u["name"],
-                    "type": u["type"], "field": u["field"], "value": round(v, 4), "unit": u["unit"],
-                    "currency": u["currency"], "source": SOURCE_LABEL.get(u["source"], u["source"]),
-                }
-                for d, v in series
-            ]
+            note = refresh(u, have, today, backfill)
+            if note:
+                notes.append(f"{u['code']}: {note}")
         except Exception as e:
-            failed.append(f"{u['code']}: {e}")
-            rows = old.get(key, [])
-            series = [(date.fromisoformat(r["date"]), float(r["value"])) for r in rows]
-            if rows:
-                failed[-1] += f" (kept {len(rows)} earlier rows)"
-        master += rows
+            failed.append(f"{u['code']}: {e}" + (f" (kept {len(have)} archived rows, to {max(have)})" if have else ""))
+        series = [(d, have[d][0]) for d in sorted(have) if d >= begin]
+        master += [
+            {
+                "date": d.isoformat(), "frequency": u["frequency"], "code": u["code"], "name": u["name"],
+                "type": u["type"], "field": u["field"], "value": round(v, 4), "unit": u["unit"],
+                "currency": u["currency"], "source": SOURCE_LABEL.get(u["source"], u["source"]),
+            }
+            for d, v in series
+        ]
         if series:
             snapshot.append(snapshot_row(u, series))
 
-    if not master:
+    if len(failed) == len(universe):
         sys.exit("Nothing fetched; files left unchanged.\n" + "\n".join(failed))
 
+    save_archive(arc)
     write_csv(LONG, master, MASTER_COLS)
+    write_csv(DASH, [{c: r[c] for c in DASH_COLS} for r in master], DASH_COLS)
     for freq, (fname, _) in WIDE_FILES.items():
         table = wide_table(master, freq)
         if table:
@@ -282,7 +412,10 @@ def main():
     write_xlsx(OUT / "Market_Data.xlsx", snapshot, master, universe)
 
     stamp = datetime.now(SGT).strftime("%Y-%m-%d %H:%M SGT")
-    print(f"{stamp}: {len(snapshot)} instruments, {len(master)} master rows")
+    print(f"{stamp}: {len(snapshot)} instruments, {len(master)} master rows, "
+          f"{sum(map(len, arc.values()))} archive rows")
+    for n in notes:
+        print("NOTE", n)
     for f in failed:
         print("FAILED", f)
 

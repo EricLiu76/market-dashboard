@@ -8,12 +8,16 @@ One row per stock x fiscal quarter, from the start of fiscal year FIRST_FY:
   date_status_source  what the status rests on: Wind (reported) or Nasdaq (Zacks); blank for later quarters
   date_yahoo      Yahoo's date for the next report, when it differs from the date used
   session         from universe.csv earnings_session: AMC after the US close, BMO before the open
-  rev_actual_bn   quarterly revenue, USD bn (Wind oper_rev, year-to-date figures differenced)
-  eps_gaap        quarterly diluted GAAP EPS (Wind eps_diluted, year-to-date figures differenced)
+  currency        the company's reporting currency (Yahoo financialCurrency): TWD for TSMC, KRW for SK hynix,
+                  EUR for Nokia, else USD. Revenue figures are in it; EPS figures are per US-listed share
+                  (per ADR) in USD
+  rev_actual_bn   quarterly revenue, bn (Wind oper_rev, year-to-date figures differenced)
+  eps_gaap        quarterly diluted GAAP EPS (Wind eps_diluted, year-to-date figures differenced); blank for
+                  non-USD reporters, where Wind's figure is per ordinary share in the home currency
   eps_adj_actual  adjusted EPS as Yahoo reports it, the basis of the EPS consensus (last 4 quarters)
   eps_cons_*      quarterly EPS consensus: mean, low, high, analysts (Yahoo; next quarter and last 4)
-  rev_cons_*_bn   quarterly revenue consensus, USD bn (Yahoo; next quarter only)
-  fy_*            consensus for the fiscal year the quarter falls in: adjusted EPS and revenue (USD bn),
+  rev_cons_*_bn   quarterly revenue consensus, bn (Yahoo; next quarter only)
+  fy_*            consensus for the fiscal year the quarter falls in: adjusted EPS and revenue (bn),
                   mean, low, high, analysts (Yahoo); upcoming quarters only
   category        calendar category: Equity for these rows (economic releases will be Economic)
 
@@ -99,7 +103,7 @@ class Yahoo:
 
     def summary(self, ticker):
         url = (f"https://query2.finance.yahoo.com/v10/finance/quoteSummary/{urllib.parse.quote(ticker)}?"
-               + urllib.parse.urlencode({"modules": "earningsTrend,earningsHistory,calendarEvents", "crumb": self.crumb}))
+               + urllib.parse.urlencode({"modules": "earningsTrend,earningsHistory,calendarEvents,financialData", "crumb": self.crumb}))
         return json.load(self.op.open(url, timeout=20))["quoteSummary"]["result"][0]
 
 
@@ -178,6 +182,7 @@ def main():
                 ys = yahoo.summary(yahoo_ticker(c))
             except Exception as e:
                 print(f"Yahoo {c}: {e}")
+        ccy = (ys.get("financialData") or {}).get("financialCurrency") or u["currency"]
         trends = [t for t in (ys.get("earningsTrend") or {}).get("trend", []) if t.get("endDate")]
         trend = {t["endDate"][:7]: t for t in trends if t.get("period") in ("0q", "+1q")}
         fy_trend = {t["endDate"][:7]: t for t in trends if t.get("period") in ("0y", "+1y")}
@@ -226,14 +231,19 @@ def main():
                 "session": session, "status": "Reported" if reported else "Expected",
                 "date_status": "Confirmed" if confirmed else "Estimate", "date_status_source": status_source,
                 "date_source": date_source,
-                "fiscal_period": f"FY{fy % 100:02d} Q{q}", "period_end": pe, "currency": u["currency"],
+                "fiscal_period": f"FY{fy % 100:02d} Q{q}", "period_end": pe, "currency": ccy,
                 "rev_actual_bn": bn(r["rev"]) if reported else "",
-                "eps_gaap": r2(r["eps"]) if reported else "", "updated": stamp,
+                "eps_gaap": r2(r["eps"]) if reported and ccy == u["currency"] else "", "updated": stamp,
             })
             h = near(hist, pe)
             if h:
-                row.update({"eps_cons": r2(raw(h, "epsEstimate"), 3), "eps_adj_actual": r2(raw(h, "epsActual")),
-                            "eps_surprise_pct": r2((raw(h, "surprisePercent") or 0) * 100, 1) if raw(h, "surprisePercent") is not None else "",
+                act, est, surprise = raw(h, "epsActual"), raw(h, "epsEstimate"), raw(h, "surprisePercent")
+                if act is not None and est and abs(est) >= 0.5 and abs(act) > 10 * abs(est):
+                    # Not on one share basis, e.g. SK hynix's actual per ordinary share against an estimate per ADR
+                    print(f"Yahoo {c} {pe}: actual EPS {act} vs estimate {est} not comparable; actual left out")
+                    act = surprise = None
+                row.update({"eps_cons": r2(est, 3), "eps_adj_actual": r2(act),
+                            "eps_surprise_pct": r2(surprise * 100, 1) if surprise is not None else "",
                             "cons_source": "Yahoo"})
             t = near(trend, pe)
             if t and not reported:

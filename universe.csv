@@ -3,12 +3,12 @@ SPX.GI,S&P 500,Broad Market Index,Global Markets,US,USD,pts,D,close,NYSE,,wind,Y
 DJI.GI,Dow Jones,Broad Market Index,Global Markets,US,USD,pts,D,close,NYSE,,wind,N,pct,
 IXIC.GI,Nasdaq Composite,Broad Market Index,Global Markets,US,USD,pts,D,close,NASDAQ,,wind,Y,pct,
 VIX.GI,CBOE VIX,Broad Market Index,Global Markets,US,USD,pts,D,close,CBOE,,wind,N,pct,
-KS11.GI,KOSPI,Broad Market Index,Asian Markets,Korea,KRW,pts,D,close,KSE,,wind,N,pct,
-N225.GI,Nikkei 225,Broad Market Index,Asian Markets,Japan,JPY,pts,D,close,TSE,,wind,N,pct,
-TPX.GI,TOPIX,Broad Market Index,Asian Markets,Japan,JPY,pts,D,close,TSE,,wind,N,pct,
-HSI.HI,Hang Seng Index,Broad Market Index,Asian Markets,Hong Kong,HKD,pts,D,close,HKEX,,wind,Y,pct,
-000300.SH,CSI 300,Broad Market Index,Asian Markets,China,CNY,pts,D,close,SSE,,wind,N,pct,
-AS51.GI,S&P/ASX 200,Broad Market Index,Asian Markets,Australia,AUD,pts,D,close,ASX,,wind,N,pct,
+KS11.GI,KOSPI,Broad Market Index,APAC Markets,Korea,KRW,pts,D,close,KSE,,wind,N,pct,
+N225.GI,Nikkei 225,Broad Market Index,APAC Markets,Japan,JPY,pts,D,close,TSE,,wind,N,pct,
+TPX.GI,TOPIX,Broad Market Index,APAC Markets,Japan,JPY,pts,D,close,TSE,,wind,N,pct,
+HSI.HI,Hang Seng Index,Broad Market Index,APAC Markets,Hong Kong,HKD,pts,D,close,HKEX,,wind,Y,pct,
+000300.SH,CSI 300,Broad Market Index,APAC Markets,China,CNY,pts,D,close,SSE,,wind,N,pct,
+AS51.GI,S&P/ASX 200,Broad Market Index,APAC Markets,Australia,AUD,pts,D,close,ASX,,wind,N,pct,
 FTSE.GI,FTSE 100,Broad Market Index,EMEA Markets,UK,GBP,pts,D,close,LSE,,wind,N,pct,
 GDAXI.GI,DAX,Broad Market Index,EMEA Markets,Germany,EUR,pts,D,close,XETRA,,wind,N,pct,
 FCHI.GI,CAC 40,Broad Market Index,EMEA Markets,France,EUR,pts,D,close,EPA,,wind,N,pct,
@@ -19,6 +19,29 @@ ASE.GI,Athens General (ASE),Broad Market Index,EMEA Markets,Greece,EUR,pts,D,clo
 892000.MI,MSCI EM Latin America,Broad Market Index,LATAM Markets,Latin America,USD,pts,D,close,OWN,,wind,N,pct,
 IBOVESPA.GI,Bovespa,Broad Market Index,LATAM Markets,Brazil,BRL,pts,D,close,B3,,wind,N,pct,
 MXX.GI,IPC Mexico,Broad Market Index,LATAM Markets,Mexico,MXN,pts,D,close,BMV,,wind,N,pct,
+XLK.P,SPDR Technology,Sector Index,,US,USD,USD,D,close,NYSE,F,wind,N,pct,
+VGT.P,Vanguard Info Tech,Sector Index,,US,USD,USD,D,close,NYSE,F,wind,N,pct,
+SMH.O,VanEck Semiconductor,Sector Index,,US,USD,USD,D,close,NASDAQ,F,wind,N,pct,
+DRAM.BAT,Roundhill Memory,Sector Index,,US,USD,USD,D,close,NYSE,F,wind,N,pct,
+DISK.P,Tema Memory,Sector Index,,US,USD,USD,D,close,NYSE,F,wind,N,pct,
+NCLD.O,Roundhill Neocloud,Sector Index,,US,USD,USD,D,close,NASDAQ,F,wind,N,pct,
+IGV.BAT,iShares Tech-Software,Sector Index,,US,USD,USD,D,close,NYSE,F,wind,N,pct,
+XLY.P,SPDR Consumer Discretionary,Sector Index,,US,USD,USD,D,close,NYSE,F,wind,N,pct,
+XRT.P,SPDR S&P Retail,Sector Index,,US,USD,USD,D,close,NYSE,F,wind,N,pct,
+XLP.P,SPDR Consumer Staples,Sector Index,,US,USD,USD,D,close,NYSE,F,wind,N,pct,
+XLE.P,SPDR Energy,Sector Index,,US,USD,USD,D,close,NYSE,F,wind,N,pct,
+XOP.P,SPDR S&P Oil & Gas E&P,Sector Index,,US,USD,USD,D,close,NYSE,F,wind,N,pct,
+XLF.P,SPDR Financials,Sector Index,,US,USD,USD,D,close,NYSE,F,wind,N,pct,
+XLV.P,SPDR Health Care,Sector Index,,US,USD,USD,D,close,NYSE,F,wind,N,pct,
+XBI.P,SPDR S&P Biotech,Sector Index,,US,USD,USD,D,close,NYSE,F,wind,N,pct,
+XPH.P,SPDR S&P Pharmaceuticals,Sector Index,,US,USD,USD,D,close,NYSE,F,wind,N,pct,
+XLI.P,SPDR Industrials,Sector Index,,US,USD,USD,D,close,NYSE,F,wind,N,pct,
+JETS.P,U.S. Global Jets,Sector Index,,US,USD,USD,D,close,NYSE,F,wind,N,pct,
+SHLD.P,Global X Defense Tech,Sector Index,,US,USD,USD,D,close,NYSE,F,wind,N,pct,
+XLU.P,SPDR Utilities,Sector Index,,US,USD,USD,D,close,NYSE,F,wind,N,pct,
+GRID.O,First Trust Smart Grid,Sector Index,,US,USD,USD,D,close,NASDAQ,F,wind,N,pct,
+AIPO.O,Defiance AI & Power Infra,Sector Index,,US,USD,USD,D,close,NASDAQ,F,wind,N,pct,
+MEME.P,Roundhill Meme Stock,Sector Index,,US,USD,USD,D,close,NYSE,F,wind,N,pct,
 NVDA.O,NVIDIA,Equity Stock,,US,USD,USD,D,close,NASDAQ,F,wind,Y,pct,AMC
 COHR.N,Coherent,Equity Stock,,US,USD,USD,D,close,NYSE,F,wind,Y,pct,AMC
 LITE.O,Lumentum,Equity Stock,,US,USD,USD,D,close,NASDAQ,F,wind,N,pct,AMC
@@ -34,8 +57,43 @@ ORCL.N,Oracle,Equity Stock,,US,USD,USD,D,close,NYSE,F,wind,N,pct,AMC
 NBIS.O,Nebius,Equity Stock,,US,USD,USD,D,close,NASDAQ,F,wind,N,pct,BMO
 CRWV.O,CoreWeave,Equity Stock,,US,USD,USD,D,close,NASDAQ,F,wind,N,pct,AMC
 IREN.O,IREN,Equity Stock,,US,USD,USD,D,close,NASDAQ,F,wind,N,pct,AMC
-GC.CMX,Gold,Commodities,,Global,USD,USD/oz,D,close,COMEX,,wind,Y,pct,
-SI.CMX,Silver,Commodities,,Global,USD,USD/oz,D,close,COMEX,,wind,N,pct,
-HG.CMX,Copper,Commodities,,Global,USD,USD/lb,D,close,COMEX,,wind,N,pct,
-CL.NYM,WTI Crude,Commodities,,Global,USD,USD/bbl,D,close,NYMEX,,wind,N,pct,
-B.IPE,Brent Crude,Commodities,,Global,USD,USD/bbl,D,close,ICE,,wind,Y,pct,
+CEG.O,Constellation Energy,Equity Stock,,US,USD,USD,D,close,NASDAQ,F,wind,N,pct,BMO
+NOK.N,Nokia,Equity Stock,,US,USD,USD,D,close,NYSE,F,wind,N,pct,BMO
+XE.O,X-energy,Equity Stock,,US,USD,USD,D,close,NASDAQ,F,wind,N,pct,
+SKHY.O,SK hynix,Equity Stock,,US,USD,USD,D,close,NASDAQ,F,wind,N,pct,
+SNDK.O,Sandisk,Equity Stock,,US,USD,USD,D,close,NASDAQ,F,wind,N,pct,AMC
+TSM.N,TSMC,Equity Stock,,US,USD,USD,D,close,NYSE,F,wind,N,pct,BMO
+AAPL.O,Apple,Equity Stock,,US,USD,USD,D,close,NASDAQ,F,wind,N,pct,AMC
+ALAB.O,Astera Labs,Equity Stock,,US,USD,USD,D,close,NASDAQ,F,wind,N,pct,AMC
+ARM.O,Arm Holdings,Equity Stock,,US,USD,USD,D,close,NASDAQ,F,wind,N,pct,AMC
+BE.N,Bloom Energy,Equity Stock,,US,USD,USD,D,close,NYSE,F,wind,N,pct,AMC
+CRCL.N,Circle Internet,Equity Stock,,US,USD,USD,D,close,NYSE,F,wind,N,pct,BMO
+LRCX.O,Lam Research,Equity Stock,,US,USD,USD,D,close,NASDAQ,F,wind,N,pct,AMC
+MU.O,Micron,Equity Stock,,US,USD,USD,D,close,NASDAQ,F,wind,N,pct,AMC
+NOW.N,ServiceNow,Equity Stock,,US,USD,USD,D,close,NYSE,F,wind,N,pct,AMC
+PLTR.O,Palantir,Equity Stock,,US,USD,USD,D,close,NASDAQ,F,wind,N,pct,AMC
+TSLA.O,Tesla,Equity Stock,,US,USD,USD,D,close,NASDAQ,F,wind,N,pct,AMC
+VST.N,Vistra,Equity Stock,,US,USD,USD,D,close,NYSE,F,wind,N,pct,BMO
+GLW.N,Corning,Equity Stock,,US,USD,USD,D,close,NYSE,F,wind,N,pct,BMO
+FN.N,Fabrinet,Equity Stock,,US,USD,USD,D,close,NYSE,F,wind,N,pct,AMC
+GC.CMX,Gold,Commodities,Precious Metals,Global,USD,USD/oz,D,close,COMEX,,wind,Y,pct,
+SI.CMX,Silver,Commodities,Precious Metals,Global,USD,USD/oz,D,close,COMEX,,wind,N,pct,
+HG.CMX,Copper,Commodities,Non-Ferrous Metals,Global,USD,USD/lb,D,close,COMEX,,wind,N,pct,
+AH.LME,LME Aluminium,Commodities,Non-Ferrous Metals,Global,USD,USD/t,D,close,LME,,wind,N,pct,
+ZS.LME,LME Zinc,Commodities,Non-Ferrous Metals,Global,USD,USD/t,D,close,LME,,wind,N,pct,
+NI.LME,LME Nickel,Commodities,Non-Ferrous Metals,Global,USD,USD/t,D,close,LME,,wind,N,pct,
+FEF.SG,Iron Ore 61% (SGX),Commodities,Ferrous & Battery Metals,Global,USD,USD/t,D,close,SGX,,wind,N,pct,
+ACF.SG,Coking Coal (Aus Premium HCC),Commodities,Ferrous & Battery Metals,Global,USD,USD/t,D,close,SGX,,wind,N,pct,
+LTH.CMX,Lithium Hydroxide (CME),Commodities,Ferrous & Battery Metals,Global,USD,USD/kg,D,close,COMEX,,wind,N,pct,
+LC.GFE,Lithium Carbonate (GFEX),Commodities,Ferrous & Battery Metals,China,CNY,CNY/t,D,close,GFEX,,wind,N,pct,
+CL.NYM,WTI Crude,Commodities,Energy,Global,USD,USD/bbl,D,close,NYMEX,,wind,N,pct,
+B.IPE,Brent Crude,Commodities,Energy,Global,USD,USD/bbl,D,close,ICE,,wind,Y,pct,
+HO.NYM,Diesel (NY Harbor ULSD),Commodities,Energy,US,USD,USD/gal,D,close,NYMEX,,wind,N,pct,
+EER_EPJK_PF4_RGC_DPG,Jet Fuel (USGC),Commodities,Energy,US,USD,USD/gal,D,close,,,eia,N,pct,
+NG.NYM,Natural Gas (Henry Hub),Commodities,Energy,US,USD,USD/MMBtu,D,close,NYMEX,,wind,N,pct,
+NCF.IPE,Newcastle Coal,Commodities,Energy,Global,USD,USD/t,D,close,ICE,,wind,N,pct,
+SRUUF,Sprott Physical Uranium,Commodities,Uranium,Global,USD,USD,D,close,,,yahoo,N,pct,
+URA.P,Uranium ETF (URA),Commodities,Uranium,US,USD,USD,D,close,NYSE,F,wind,N,pct,
+C.CBT,Corn,Commodities,Agriculture,US,USD,USc/bu,D,close,CBOT,,wind,N,pct,
+W.CBT,Wheat,Commodities,Agriculture,US,USD,USc/bu,D,close,CBOT,,wind,N,pct,
+S.CBT,Soybeans,Commodities,Agriculture,US,USD,USc/bu,D,close,CBOT,,wind,N,pct,
