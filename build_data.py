@@ -30,7 +30,7 @@ universe.csv columns:
   type       grouping shown on the dashboard, e.g. Broad Market Index, Equity Stock, Macro
   subtype    optional sub-heading within a type, e.g. Global Markets, APAC Markets; cards follow file order
   country    Equity Stock only: where the company is run from (head office), e.g. United States, Taiwan;
-             groups the calendar's stock filter (group order: COUNTRY_ORDER in build_calendar.py)
+             the calendar's country filter (button order: COUNTRY_ORDER in build_calendar.py)
   domicile   Equity Stock only: country of incorporation (Wind wss field address), e.g. Cayman Islands for Fabrinet
   frequency  D daily, W weekly, M monthly, Q quarterly, A annual
   field      Wind field to pull, e.g. close

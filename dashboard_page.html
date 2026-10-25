@@ -97,8 +97,6 @@
 /* Calendar */
 .cal { display: grid; gap: var(--cds-gap-lg); font-family: var(--font-anthropic-sans); font-variant-numeric: tabular-nums; container-type: inline-size; }
 .cal-bar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--cds-gap-sm) var(--cds-gap-md); }
-.cal-stocks { flex-basis: 100%; display: flex; flex-wrap: wrap; align-items: flex-start; gap: var(--cds-gap-sm); }
-.cal-stocks .mk-seg button:first-child:not(:only-child):not([aria-pressed="true"]) { color: var(--color-fg); font-weight: var(--cds-font-weight-medium); }
 .cal-layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--cds-gap-lg); align-items: start; }
 @container (min-width: 56rem) { .cal-layout { grid-template-columns: minmax(0, 1.7fr) minmax(16rem, 1fr); } }
 .cal-main, .cal-side { display: grid; gap: var(--cds-gap-lg); min-width: 0; align-content: start; }
@@ -237,8 +235,8 @@
       <div class="mk-seg" id="cal-view" role="group" aria-label="View"></div>
       <button type="button" class="mk-toggle" id="cal-today">Today</button>
       <div class="mk-seg" id="cal-cat" role="group" aria-label="Category"></div>
+      <div class="mk-seg" id="cal-country" role="group" aria-label="Country"></div>
       <span class="mk-note" id="cal-asof" data-source="earnings"></span>
-      <div class="cal-stocks" id="cal-stock" role="group" aria-label="Stocks by country"></div>
     </div>
     <div class="cal-layout">
       <div class="cal-main">
@@ -856,7 +854,7 @@
   };
   const CP = () => {
     const p = dash.params() || {}, today = todayISO(), day = p.cd || today;
-    return { view: p.cv === 'agenda' ? 'agenda' : 'month', day, month: p.cm || day.slice(0, 7), cat: p.cc || null, country: p.cn || null, stock: p.cs || null, past: !!p.cpast, today };
+    return { view: p.cv === 'agenda' ? 'agenda' : 'month', day, month: p.cm || day.slice(0, 7), cat: p.cc || null, country: p.cn || null, past: !!p.cpast, today };
   };
   const cty = (e) => e.country || 'Other';
   const pick = (dISO, extra = {}) => dash.setParams({ cd: dISO, cm: dISO.slice(0, 7), ...extra });
@@ -1101,23 +1099,14 @@
     segButtons(document.getElementById('cal-view'), [['month', 'Month'], ['agenda', 'Agenda']], p.view, (v) => dash.setParams({ cv: v === 'month' ? null : v }));
     const status = load();
     const cats = [...new Set(events.map((e) => e.category).filter(Boolean))];
-    segButtons(document.getElementById('cal-cat'), [[null, 'All'], ...cats.map((c) => [c, c])], p.cat, (v) => dash.setParams({ cc: v, cn: null, cs: null }));
-    // Stock filter applies to Equity events only: one group per country (country_order), stocks in universe.csv order;
-    // a country's first button picks all its stocks
-    const stockBox = document.getElementById('cal-stock');
+    segButtons(document.getElementById('cal-cat'), [[null, 'All'], ...cats.map((c) => [c, c])], p.cat, (v) => dash.setParams({ cc: v, cn: null }));
+    // Country filter applies to Equity events only, countries in country_order
+    const countryBox = document.getElementById('cal-country');
     const eq = events.filter((e) => e.category === 'Equity');
-    stockBox.hidden = (p.cat && p.cat !== 'Equity') || !eq.length;
-    const countries = d3.groups(eq, cty)
-      .map(([c, es]) => ({ c, rank: d3.min(es, (e) => +e.country_order || 999), tickers: [...new Set(d3.sort(es, (e) => +e.stock_order).map((e) => e.ticker))] }))
-      .sort((a, b) => a.rank - b.rank || a.c.localeCompare(b.c));
-    const allSeg = el('div', 'mk-seg');
-    segButtons(allSeg, [[null, 'All stocks']], p.country || p.stock || null, () => dash.setParams({ cn: null, cs: null }));
-    stockBox.replaceChildren(allSeg, ...countries.map(({ c, tickers }) => {
-      const seg = el('div', 'mk-seg'); seg.setAttribute('role', 'group'); seg.setAttribute('aria-label', c);
-      segButtons(seg, [[c, c], ...tickers.map((t) => ['t:' + t, t])], p.stock ? 't:' + p.stock : p.country,
-        (v) => dash.setParams(v.startsWith('t:') ? { cn: null, cs: v.slice(2) } : { cn: v, cs: null }));
-      return seg;
-    }));
+    countryBox.hidden = (p.cat && p.cat !== 'Equity') || !eq.length;
+    const countries = d3.groups(eq, cty).map(([c, es]) => [c, d3.min(es, (e) => +e.country_order || 999)])
+      .sort((a, b) => a[1] - b[1] || a[0].localeCompare(b[0]));
+    segButtons(countryBox, [[null, 'All countries'], ...countries.map(([c]) => [c, c])], p.country, (v) => dash.setParams({ cn: v }));
 
     const dayBox = document.getElementById('cal-day');
     document.getElementById('cal-month').hidden = p.view !== 'month';
@@ -1137,7 +1126,7 @@
     }
     if (events.length) asof.replaceChildren('Data as of ', mark(el('span', null, events[0].updated), 'updated', events[0].event_id));
 
-    const evs = events.filter((e) => (!p.cat || e.category === p.cat) && (!p.country || cty(e) === p.country) && (!p.stock || e.ticker === p.stock));
+    const evs = events.filter((e) => (!p.cat || e.category === p.cat) && (!p.country || cty(e) === p.country));
     const byDay = d3.group(evs, (e) => e.event_date);
     if (p.view === 'month') {
       drawMonth(p, byDay);

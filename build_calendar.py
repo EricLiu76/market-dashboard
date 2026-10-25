@@ -21,9 +21,8 @@ One row per stock x fiscal quarter, from the start of fiscal year FIRST_FY:
                   mean, low, high, analysts (Yahoo); upcoming quarters only
   category        calendar category: Equity for these rows (economic releases will be Economic)
   country         from universe.csv country: where the company is run from (not where it is incorporated)
-  country_order   position of the country in COUNTRY_ORDER (the page's stock filter groups by country in this
-                  order; a country not in the list goes after it)
-  stock_order     the stock's position in universe.csv (order within its country in the stock filter)
+  country_order   position of the country in COUNTRY_ORDER, the order of the page's country filter
+                  (a country not in the list goes after it)
 
 All consensus figures come from Yahoo, on one basis (adjusted EPS); dates and actuals from Wind,
 whether an upcoming date is confirmed from Nasdaq.com (Zacks).
@@ -44,9 +43,9 @@ SGT = timezone(timedelta(hours=8))
 FIRST_FY = 2026
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/130 Safari/537.36"
 MONTHS = {m: i for i, m in enumerate(["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], start=1)}
-# Country groups in the calendar's stock filter, in the user's order (2026-10-25)
+# Buttons of the calendar's country filter, in the user's order (2026-10-25)
 COUNTRY_ORDER = ["United States", "United Kingdom", "Taiwan", "Korea", "Australia", "Thailand", "Netherlands", "Finland"]
-COLS = ["event_id", "code", "ticker", "name", "country", "country_order", "stock_order", "category", "kind", "event_date", "session", "status", "date_status",
+COLS = ["event_id", "code", "ticker", "name", "country", "country_order", "category", "kind", "event_date", "session", "status", "date_status",
         "date_status_source", "date_source",
         "date_yahoo", "fiscal_period", "period_end", "currency", "rev_actual_bn", "eps_gaap", "eps_adj_actual",
         "eps_surprise_pct", "rev_cons_bn", "rev_cons_low_bn", "rev_cons_high_bn", "rev_cons_n", "eps_cons",
@@ -179,12 +178,12 @@ def main():
 
     stamp = datetime.now(SGT).strftime("%Y-%m-%d %H:%M SGT")
     rows = []
-    for n, u in enumerate(universe, start=1):
+    for u in universe:
         c = u["code"]
         country = u.get("country", "")
         if not country:
             print(f"NOTE {c}: no country in universe.csv; shown under Other in the calendar")
-        place = {"country": country, "stock_order": n,
+        place = {"country": country,
                  "country_order": COUNTRY_ORDER.index(country) + 1 if country in COUNTRY_ORDER else ""}
         fem = int(str(fy_end[c]).split("-")[0])
         ys = {}
