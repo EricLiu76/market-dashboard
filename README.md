@@ -4,7 +4,7 @@
 
 A daily market summary with two tabs:
 
-- **Markets**: a card for every instrument, grouped into Broad Market Index (global, Asian, EMEA and LATAM sub-groups), Equity Stock and Commodities. Each card has a sparkline, the change over the chosen range, the last day's change, the 52-week range and badges for unusual moves (σ), 52-week highs and lows and 200-day line crosses. Click a card for a full chart with 50- and 200-day lines, a compare overlay and stats. A signals strip and a sortable table of every market sit above and below the cards.
+- **Markets**: a card for every instrument, grouped into Broad Market Index (global, APAC, EMEA and LATAM sub-groups), Sector Index, Equity Stock and Commodities (precious, non-ferrous, ferrous and battery metals, energy, uranium and agriculture sub-groups). Each card has a sparkline, the change over the chosen range, the last day's change, the 52-week range and badges for unusual moves (σ), 52-week highs and lows and 200-day line crosses. Click a card for a full chart with 50- and 200-day lines, a compare overlay and stats. A signals strip and a sortable table of every market sit above and below the cards.
 - **Calendar**: earnings dates in month and agenda views, marked (Confirmed) or (Estimate), with actual revenue and EPS for reported quarters and consensus for upcoming ones.
 
 The page is static: `index.html` loads `dashboard_page.html` (the dashboard's own code) and `dash-shim.js`, which reads the CSV files in `data/`. Filters and the open chart are kept in the URL, so a link reopens the same view.
@@ -18,7 +18,7 @@ The page is static: `index.html` loads `dashboard_page.html` (the dashboard's ow
 | Confirmed or estimated upcoming dates | Nasdaq.com (Zacks) |
 | Consensus (quarterly and fiscal-year revenue and adjusted EPS), EPS beat or miss | Yahoo Finance |
 
-Stock prices are forward-adjusted for splits and dividends; commodities are Wind continuous futures. The data belongs to its providers; this page is for information only and is not investment advice.
+Stock prices are forward-adjusted for splits and dividends; commodities are Wind continuous futures. In the calendar, revenue is in the company's reporting currency (TWD for TSMC, KRW for SK hynix, EUR for Nokia, else USD) and EPS is per US-listed share in USD. The data belongs to its providers; this page is for information only and is not investment advice.
 
 ## Files
 
@@ -33,6 +33,8 @@ Stock prices are forward-adjusted for splits and dividends; commodities are Wind
 | `publish_github.py` | Copies the site and data into this repo and pushes |
 
 ## Refreshing
+
+A scheduled task refreshes the data every Tuesday to Saturday at 06:00 SGT, after the US close. By hand:
 
 1. `python build_data.py` (also runs `build_calendar.py`)
 2. `python publish_github.py`
