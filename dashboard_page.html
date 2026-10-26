@@ -902,7 +902,7 @@
     if (e.session === 'ASIA' && e.time_sgt) return [fDow(e.date) + ' ' + e.time_sgt, 'SGT · ' + e.time_local + ' local'];
     if (e.session === 'AMC') return [fDow(addDays(e.date, Math.floor((16 + sh) / 24))) + ' ' + hm(16 + sh) + '+', 'SGT · after the 16:00 ET close'];
     if (e.session === 'BMO') return [fDow(e.date) + ' by ' + hm(9 + sh, 30), 'SGT · before the 09:30 ET open'];
-    return [null, credit(e) ? 'Time not announced' : 'Time not set'];
+    return [null, credit(e) && e.status === 'Expected' ? 'Time not announced' : 'Time not set'];
   };
 
   // ---------- data and state ----------
@@ -1023,7 +1023,9 @@
         consSubs(e, id, 'eps_cons_low', 'eps_cons_high', 'eps_cons_n', fEps));
       if (e.fy_rev_cons_bn != null) kv(dl, e.fy_label + ' revenue consensus', mark(el('span', null, fBn(e.fy_rev_cons_bn, e.currency)), 'fy_rev_cons_bn', id),
         consSubs(e, id, 'fy_rev_low_bn', 'fy_rev_high_bn', 'fy_rev_n', fBn));
-      if (e.fy_metric_cons_bn != null) kv(dl, e.fy_label + ' ' + e.metric_label.toLowerCase() + ' consensus', mark(el('span', null, fBn(e.fy_metric_cons_bn, e.currency)), 'fy_metric_cons_bn', id));
+      // "Net income" -> "net income" mid-label; EBITDA stays as it is
+      const ml = /^[A-Z][a-z]/.test(e.metric_label) ? e.metric_label[0].toLowerCase() + e.metric_label.slice(1) : e.metric_label;
+      if (e.fy_metric_cons_bn != null) kv(dl, e.fy_label + ' ' + ml + ' consensus', mark(el('span', null, fBn(e.fy_metric_cons_bn, e.currency)), 'fy_metric_cons_bn', id));
       if (e.fy_eps_cons != null) kv(dl, e.fy_label + ' EPS consensus' + adj, mark(el('span', null, fEps(e.fy_eps_cons)), 'fy_eps_cons', id),
         consSubs(e, id, 'fy_eps_low', 'fy_eps_high', 'fy_eps_n', fEps));
       kv(dl, 'Quarter ending', pe);
