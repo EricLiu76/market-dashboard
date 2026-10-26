@@ -302,12 +302,12 @@
         </section>
         <section class="cal-card" id="cal-recent" aria-label="Recent results">
           <h2>Recent results</h2>
-          <p class="mk-note">Adjusted EPS against the consensus before the report.</p>
+          <p class="mk-note">Against the consensus before the report: adjusted EPS (Equity); net income, operating income or EBITDA (Credit).</p>
           <div class="cal-items" data-source="earnings"><div class="dash-skeleton" style="min-height: 4rem"></div></div>
         </section>
       </aside>
     </div>
-    <p class="mk-note">Equity: an upcoming date shows (Confirmed) once the company has announced it, otherwise (Estimate); reported dates show (Confirmed). Consensus covers quarterly and fiscal-year revenue and adjusted EPS, and the beat or miss compares adjusted EPS with consensus. Times are Singapore time, with US daylight saving applied.</p>
+    <p class="mk-note">Equity: an upcoming date shows (Confirmed) once the company has announced it, otherwise (Estimate); reported dates show (Confirmed). Consensus covers quarterly and fiscal-year revenue and adjusted EPS, and the beat or miss compares adjusted EPS with consensus. Credit: names under credit coverage; besides revenue and EPS, each has the consensus for its credit metric (net income, operating income or EBITDA), the beat or miss compares that metric, and release times are as the company announced them. Fiscal quarters read 2QFY26: quarter, then the fiscal year as the company names it (Japanese companies by the year it starts). Times are Singapore time, with US daylight saving applied.</p>
   </div>
 </div>
 
@@ -976,7 +976,7 @@
   // "low to high · n analysts · source" under a consensus figure
   const consSubs = (e, id, lo, hi, n, fmt) => {
     const subs = [];
-    if (e[lo] != null && e[hi] != null) subs.push(mark(el('span', null, fmt(e[lo])), lo, id), ' to ', mark(el('span', null, fmt(e[hi])), hi, id));
+    if (e[lo] != null && e[hi] != null) subs.push(mark(el('span', null, fmt(e[lo], e.currency)), lo, id), ' to ', mark(el('span', null, fmt(e[hi], e.currency)), hi, id));
     if (e[n] != null) subs.push(subs.length ? ' · ' : '', mark(el('span', null, String(e[n])), n, id), ' analysts');
     return subs;
   };
