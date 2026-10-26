@@ -329,12 +329,14 @@
   const fmtChg = (r, v) => v == null ? '—' : isBp(r) ? sign(v) + Math.abs(v).toFixed(1) + 'bp' : sign(v) + Math.abs(v).toFixed(2) + '%';
   const fmtLast = (r, v = r.last) => {
     if (v == null) return '—';
-    if (isBp(r)) return v.toFixed(2) + '%';
+    if (isBp(r)) return v.toFixed(3) + '%';
     if (v >= 100000) return d3.format(',.0f')(v);
     if (v >= 10) return d3.format(',.2f')(v);
     return v.toFixed(4);
   };
   const tone = (r, v) => (isBp(r) || !v ? '' : v > 0 ? 'mk-up' : 'mk-down');
+  // Change from base to v in the row's own terms: bp for yields, percent otherwise
+  const move = (r, v, base) => (isBp(r) ? (v - base) * 100 : (v / base - 1) * 100);
   const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
   const mark = (e, field, code) => { e.setAttribute('data-source', 'snapshot'); e.setAttribute('data-field', field); e.setAttribute('data-where', where(code)); return e; };
   const safeId = (s) => s.replace(/[^A-Za-z0-9]/g, '');
@@ -672,7 +674,9 @@
       const oarr = map.get(other.code) || [];
       const oBase = onOrBefore(oarr, start);
       if (oBase) cmpPts = oarr.filter((d) => d.date >= oBase.date && d.date <= end)
-        .map((d) => ({ date: d.date < start ? start : d.date, raw: d.close, v: d.close * data[0].close / oBase.close, pct: (d.close / oBase.close - 1) * 100 }));
+        // Two yields are lined up by level (bp moves); anything else is rebased by ratio
+        .map((d) => ({ date: d.date < start ? start : d.date, raw: d.close, pct: move(other, d.close, oBase.close),
+          v: isBp(r) && isBp(other) ? data[0].close + d.close - oBase.close : d.close * data[0].close / oBase.close }));
     }
     const vals = data.flatMap((d) => [d.close, p.ma50 ? d.ma50 : null, p.ma200 ? d.ma200 : null]).concat(cmpPts.map((d) => d.v)).filter((v) => v != null);
     const y = d3.scaleLinear(d3.extent(vals), [H - mb, mt]).nice();
@@ -713,7 +717,7 @@
         const cx = x(d.date);
         hov.attr('visibility', 'visible').select('line').attr('x1', cx).attr('x2', cx);
         dot.attr('cx', cx).attr('cy', y(d.close));
-        const lines = [[dash.colors[0], r.name, fmtY(d.close) + '  ' + fmtChg(r, (d.close / data[0].close - 1) * 100)]];
+        const lines = [[dash.colors[0], r.name, fmtY(d.close) + '  ' + fmtChg(r, move(r, d.close, data[0].close))]];
         if (p.ma50 && d.ma50 != null) lines.push([dash.colors[2], '50-day', fmtY(d.ma50)]);
         if (p.ma200 && d.ma200 != null) lines.push([dash.colors[4], '200-day', fmtY(d.ma200)]);
         if (cmpPts.length) { const o = onOrBefore(cmpPts, d.date); if (o) lines.push([dash.colors[1], other.name, fmtLast(other, o.raw) + '  ' + fmtChg(other, o.pct)]); }
