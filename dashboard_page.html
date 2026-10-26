@@ -1248,9 +1248,9 @@
     const cats = [...new Set(events.map((e) => e.category).filter(Boolean))];
     segButtons(document.getElementById('cal-cat'), [[null, 'All'], ...cats.map((c) => [c, c])], p.cat, (v) => dash.setParams({ cc: v, cn: null }));
     document.querySelectorAll('#cal-cat button').forEach((b, i) => { if (i) b.prepend(el('span', 'cal-dot' + catCls({ category: cats[i - 1] }))); });
-    // Country filter applies to company events (Equity and Credit), countries in country_order
+    // Country filter: company events (Equity, Credit) and Macro events, countries in country_order
     const countryBox = document.getElementById('cal-country');
-    const COS = ['Equity', 'Credit'];
+    const COS = ['Equity', 'Credit', 'Macro'];
     const eq = events.filter((e) => COS.includes(e.category) && (!p.cat || e.category === p.cat));
     countryBox.hidden = (p.cat && !COS.includes(p.cat)) || !eq.length;
     const countries = d3.groups(eq, cty).map(([c, es]) => [c, d3.min(es, (e) => +e.country_order || 999)])
