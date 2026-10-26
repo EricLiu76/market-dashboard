@@ -134,7 +134,7 @@
 .cal-cell.cal-has .cal-cnt { color: var(--cal-accent); font-weight: var(--cds-font-weight-medium); }
 .cal-tks { display: none; flex-wrap: wrap; justify-content: center; gap: 2px; max-width: 100%; }
 .cal-tk { font-size: 11px; line-height: 1.5; padding: 0 5px; border-radius: 4px; border: 1px solid var(--color-border-line); background: var(--color-panel); color: var(--color-fg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
-.cal-tk.cal-exp { border-color: var(--cal-accent); color: var(--cal-accent); }
+.cal-tk.cal-exp { color: var(--cat); }
 .cal-tk.cal-est { border-style: dashed; }
 .cal-dst { margin-left: 4px; font-weight: var(--cds-font-weight-medium); }
 .cal-dst.cal-est { color: var(--color-fg-muted); font-weight: normal; }
@@ -148,10 +148,10 @@
 .cal-sess-h b { font-weight: var(--cds-font-weight-medium); color: var(--color-fg); }
 .cal-ev { display: grid; gap: var(--cds-gap-sm); background: var(--color-bg); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-md); min-width: 0; }
 .cal-ev-top { display: flex; flex-wrap: wrap; align-items: center; gap: var(--cds-gap-sm); }
-.cal-ticker { font-weight: var(--cds-font-weight-medium); font-size: var(--cds-font-size-caption); letter-spacing: .03em; padding: 1px 8px; border: 1px solid var(--color-fg-muted); border-radius: 6px; }
+.cal-ticker { font-weight: var(--cds-font-weight-medium); font-size: var(--cds-font-size-caption); letter-spacing: .03em; padding: 1px 8px; border: 1px solid var(--cat); border-radius: 6px; }
 .cal-ev-title { font-weight: var(--cds-font-weight-medium); }
 .cal-status { margin-left: auto; font-size: var(--cds-font-size-caption); padding: 0 8px; border-radius: 999px; border: 1px solid var(--color-border-line); color: var(--color-fg-muted); }
-.cal-status.cal-exp { border-color: var(--cal-accent); color: var(--cal-accent); }
+.cal-status.cal-exp { border-color: var(--cat); color: var(--cat); }
 .cal-time { display: flex; flex-wrap: wrap; align-items: baseline; gap: .5em; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
 .cal-time b { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-heading); color: var(--color-fg); }
 .cal-kv { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 11rem), 1fr)); gap: var(--cds-gap-sm) var(--cds-gap-md); margin: 0; }
@@ -173,7 +173,15 @@
 .cal-date b { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); }
 .cal-item-body { display: grid; gap: 2px; min-width: 0; }
 .cal-item-top { display: flex; flex-wrap: wrap; align-items: center; gap: .5em; }
-.cal-left { margin-left: auto; font-size: var(--cds-font-size-caption); color: var(--cal-accent); font-weight: var(--cds-font-weight-medium); white-space: nowrap; }
+.cal-left { margin-left: auto; font-size: var(--cds-font-size-caption); color: var(--cat); font-weight: var(--cds-font-weight-medium); white-space: nowrap; }
+/* Category colours (user's choice 2026-10-26): Equity blue, Credit green, Macro grey; on ticker chips, event cards and list items */
+#calendar { --cat: var(--color-fg-muted); }
+.cat-equity { --cat: var(--series-1); }
+.cat-credit { --cat: var(--series-6); }
+.cat-macro, .cat-economic { --cat: var(--color-fg-muted); }
+.cal-tk[class*="cat-"], .cal-ev[class*="cat-"], .cal-item[class*="cat-"] { border-color: var(--cat); }
+.cal-ev[class*="cat-"], .cal-item[class*="cat-"] { border-left-width: 4px; }
+.cal-dot { display: inline-block; width: .6em; height: .6em; border-radius: 50%; background: var(--cat); margin-right: .4em; }
 </style>
 
 <div class="mk">
@@ -280,7 +288,7 @@
             </div>
           </div>
           <div class="cal-grid" id="cal-grid" data-source="earnings"></div>
-          <p class="mk-note">Dashed ticker: the date is an estimate. Solid: the date is confirmed.</p>
+          <p class="mk-note">Dashed ticker: the date is an estimate. Solid: the date is confirmed. Colour: blue Equity, green Credit, grey Macro.</p>
         </section>
         <section class="cal-card" id="cal-agenda" aria-label="Agenda" hidden>
           <div class="cal-mhead">
@@ -879,6 +887,7 @@
   const beat = (e, id, f = 'eps_surprise_pct') => mark(el('span', 'cal-beat ' + (e[f] >= 0 ? 'mk-up' : 'mk-down'),
     (e[f] >= 0 ? 'Beat ' : 'Miss ') + sign(e[f]) + Math.abs(e[f]).toFixed(1) + '%'), f, id);
   const credit = (e) => e.category === 'Credit';
+  const catCls = (e) => (e.category ? ' cat-' + e.category.toLowerCase() : '');  // category colour, see CSS
   // "(Confirmed)" or "(Estimate)" after a results date
   const dst = (e, id) => {
     const s = el('span', 'cal-dst' + (e.date_status === 'Estimate' ? ' cal-est' : ''), '(');
@@ -956,7 +965,7 @@
     foot.append(el('span', 'cal-cnt', list.length ? String(list.length) : ' '));
     if (list.length) {
       const tks = el('div', 'cal-tks');
-      list.forEach((e) => tks.append(el('span', 'cal-tk' + (e.status === 'Expected' ? ' cal-exp' : '') + (e.date_status === 'Estimate' ? ' cal-est' : ''), e.ticker)));
+      list.forEach((e) => tks.append(el('span', 'cal-tk' + catCls(e) + (e.status === 'Expected' ? ' cal-exp' : '') + (e.date_status === 'Estimate' ? ' cal-est' : ''), e.ticker)));
       foot.append(tks);
     }
     b.append(el('span', 'cal-num', String(d.getUTCDate())), foot);
@@ -983,7 +992,7 @@
 
   function evCard(e) {
     const id = e.event_id;
-    const c = el('article', 'cal-ev'); c.id = 'cal-ev-' + id.replace(/[^A-Za-z0-9]/g, '');
+    const c = el('article', 'cal-ev' + catCls(e)); c.id = 'cal-ev-' + id.replace(/[^A-Za-z0-9]/g, '');
     const top = el('div', 'cal-ev-top');
     const title = el('span', 'cal-ev-title');
     title.append(mark(el('span', null, e.fiscal_period), 'fiscal_period', id), ' earnings · ', mark(el('span', null, e.name), 'name', id));
@@ -1078,7 +1087,7 @@
     const box = document.querySelector('#cal-next-list .cal-items');
     box.replaceChildren(...(up.length ? up.map((e) => {
       const id = e.event_id;
-      const b = el('button', 'cal-item'); b.type = 'button';
+      const b = el('button', 'cal-item' + catCls(e)); b.type = 'button';
       const body = el('span', 'cal-item-body');
       const top = el('span', 'cal-item-top');
       const left = Math.round((e.date - parse(p.today)) / 864e5);
@@ -1102,7 +1111,7 @@
     const rbox = document.querySelector('#cal-recent .cal-items');
     rbox.replaceChildren(...(rec.length ? rec.map((e) => {
       const id = e.event_id;
-      const b = el('button', 'cal-item'); b.type = 'button';
+      const b = el('button', 'cal-item' + catCls(e)); b.type = 'button';
       const body = el('span', 'cal-item-body');
       const top = el('span', 'cal-item-top');
       top.append(mark(el('span', 'cal-ticker', e.ticker), 'ticker', id), mark(el('span', 'cal-ev-title', e.fiscal_period), 'fiscal_period', id));
@@ -1172,6 +1181,7 @@
     const status = load();
     const cats = [...new Set(events.map((e) => e.category).filter(Boolean))];
     segButtons(document.getElementById('cal-cat'), [[null, 'All'], ...cats.map((c) => [c, c])], p.cat, (v) => dash.setParams({ cc: v, cn: null }));
+    document.querySelectorAll('#cal-cat button').forEach((b, i) => { if (i) b.prepend(el('span', 'cal-dot' + catCls({ category: cats[i - 1] }))); });
     // Country filter applies to company events (Equity and Credit), countries in country_order
     const countryBox = document.getElementById('cal-country');
     const COS = ['Equity', 'Credit'];
