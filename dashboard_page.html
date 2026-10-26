@@ -94,6 +94,18 @@
 .mk-tabs button[aria-selected="true"] { background: var(--color-fg); color: var(--color-bg); }
 .mk [hidden] { display: none !important; }
 
+/* Settings */
+.mk-top-r { display: flex; align-items: center; gap: var(--cds-gap-sm); }
+.mk-icon { font: inherit; display: inline-grid; place-items: center; width: 2rem; height: 2rem; padding: 0; border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); background: transparent; color: var(--color-fg-muted); cursor: pointer; }
+.mk-icon:hover { color: var(--color-fg); border-color: var(--color-fg-muted); }
+.mk-icon svg { width: 1.05rem; height: 1.05rem; }
+.mk-dlg { box-sizing: border-box; width: min(24rem, calc(100vw - 2rem)); padding: 0; border: 1px solid var(--cds-border); border-radius: calc(var(--cds-radius) * 2); background: var(--color-panel); color: var(--color-fg); box-shadow: var(--cds-shadow-popover); }
+.mk-dlg::backdrop { background: rgba(0, 0, 0, .4); }
+.mk-dlg-head { display: flex; align-items: center; justify-content: space-between; gap: var(--cds-gap-md); padding: var(--cds-pad-md) var(--cds-pad-lg); border-bottom: 1px solid var(--color-border-line); }
+.mk-dlg-head h2 { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); }
+.mk-dlg-body { display: grid; justify-items: start; gap: var(--cds-gap-sm); padding: var(--cds-pad-lg); }
+.mk-dlg-body .mk-seg button { font-size: var(--cds-font-size-body); padding: var(--cds-pad-xs) var(--cds-pad-lg); }
+
 /* Calendar */
 .cal { display: grid; gap: var(--cds-gap-lg); font-family: var(--font-anthropic-sans); font-variant-numeric: tabular-nums; container-type: inline-size; }
 .cal-bar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--cds-gap-sm) var(--cds-gap-md); }
@@ -167,11 +179,30 @@
 <div class="mk">
   <div class="mk-top">
     <h1 class="mk-title">Market summary</h1>
-    <div class="mk-seg mk-tabs" role="tablist" aria-label="Pages">
-      <button type="button" role="tab" id="tab-markets" data-tab="markets" aria-controls="markets">Markets</button>
-      <button type="button" role="tab" id="tab-calendar" data-tab="calendar" aria-controls="calendar">Calendar</button>
+    <div class="mk-top-r">
+      <div class="mk-seg mk-tabs" role="tablist" aria-label="Pages">
+        <button type="button" role="tab" id="tab-markets" data-tab="markets" aria-controls="markets">Markets</button>
+        <button type="button" role="tab" id="tab-calendar" data-tab="calendar" aria-controls="calendar">Calendar</button>
+      </div>
+      <button type="button" class="mk-icon" id="settings-open" aria-label="Settings" title="Settings" aria-haspopup="dialog">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h9M19 7h1M4 17h1M11 17h9"/><circle cx="16" cy="7" r="2.5"/><circle cx="8" cy="17" r="2.5"/></svg>
+      </button>
     </div>
   </div>
+
+  <dialog class="mk-dlg" id="settings" aria-labelledby="settings-title">
+    <div class="mk-dlg-head">
+      <h2 id="settings-title">Settings</h2>
+      <button type="button" class="mk-icon" id="settings-close" aria-label="Close settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="mk-dlg-body">
+      <span class="mk-label" id="theme-label">Theme</span>
+      <div class="mk-seg" id="theme" role="group" aria-labelledby="theme-label"></div>
+      <p class="mk-note">Auto follows your device's light or dark setting. Saved in this browser.</p>
+    </div>
+  </dialog>
 
   <div class="mk" id="markets" role="tabpanel" aria-labelledby="tab-markets">
   <header class="mk-head" id="summary">
@@ -281,6 +312,32 @@
 </div>
 
 <script>
+(() => {
+  // Settings: theme. Auto follows the device; Light and Dark override it (index.html applies a saved
+  // choice before the page draws). Kept in this browser's storage, which may be unavailable.
+  const THEMES = [['auto', 'Auto'], ['light', 'Light'], ['dark', 'Dark']];
+  const KEY = 'mk-theme';
+  const dlg = document.getElementById('settings');
+  const seg = document.getElementById('theme');
+  let saved = 'auto';
+  try { saved = localStorage.getItem(KEY) || 'auto'; } catch (e) { }
+  const apply = (t) => {
+    if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+    else delete document.documentElement.dataset.theme;
+    try { if (t === 'auto') localStorage.removeItem(KEY); else localStorage.setItem(KEY, t); } catch (e) { }
+    seg.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.theme === t)));
+  };
+  seg.replaceChildren(...THEMES.map(([v, label]) => {
+    const b = document.createElement('button'); b.type = 'button'; b.dataset.theme = v; b.textContent = label;
+    b.addEventListener('click', () => apply(v));
+    return b;
+  }));
+  apply(saved);
+  document.getElementById('settings-open').addEventListener('click', () => dlg.showModal());
+  document.getElementById('settings-close').addEventListener('click', () => dlg.close());
+  dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); }); // a click on the backdrop
+})();
+
 (() => {
   // Page tabs: Markets and Calendar
   const tabs = [...document.querySelectorAll('.mk-tabs [data-tab]')];
