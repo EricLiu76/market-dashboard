@@ -129,10 +129,10 @@
 .cal-cell.cal-sel { border-color: var(--color-fg); background: var(--color-bg); }
 .cal-num { display: inline-grid; place-items: center; width: 2rem; height: 2rem; border-radius: 50%; font-weight: var(--cds-font-weight-medium); font-size: var(--cds-font-size-body); }
 .cal-cell.cal-today .cal-num { background: var(--cal-accent); color: var(--color-bg); }
-.cal-foot { display: grid; justify-items: center; gap: 2px; min-width: 0; max-width: 100%; }
+.cal-foot { display: grid; justify-items: center; align-content: start; gap: 2px; min-width: 0; max-width: 100%; }
 .cal-cnt { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
 .cal-cell.cal-has .cal-cnt { color: var(--cal-accent); font-weight: var(--cds-font-weight-medium); }
-.cal-tks { display: none; flex-wrap: wrap; justify-content: center; gap: 2px; max-width: 100%; }
+.cal-tks { display: none; flex-wrap: wrap; justify-content: center; align-content: flex-start; align-items: flex-start; gap: 2px; max-width: 100%; }
 .cal-tk { font-size: 11px; line-height: 1.5; padding: 0 5px; border-radius: 4px; border: 1px solid var(--color-border-line); background: var(--color-panel); color: var(--color-fg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 .cal-tk.cal-exp { color: var(--cat); }
 .cal-tk.cal-est { border-style: dashed; }
@@ -310,12 +310,12 @@
         </section>
         <section class="cal-card" id="cal-recent" aria-label="Recent results">
           <h2>Recent results</h2>
-          <p class="mk-note">Against the consensus before the report: adjusted EPS (Equity); net income, operating income or EBITDA (Credit).</p>
+          <p class="mk-note">Against the consensus before the report: adjusted EPS (Equity); net income, operating income or EBITDA (Credit). Choose Macro for the latest data releases.</p>
           <div class="cal-items" data-source="earnings"><div class="dash-skeleton" style="min-height: 4rem"></div></div>
         </section>
       </aside>
     </div>
-    <p class="mk-note">Equity: an upcoming date shows (Confirmed) once the company has announced it, otherwise (Estimate); reported dates show (Confirmed). Consensus covers quarterly and fiscal-year revenue and adjusted EPS, and the beat or miss compares adjusted EPS with consensus. Credit: names under credit coverage; besides revenue and EPS, each has the consensus for its credit metric (net income, operating income or EBITDA), the beat or miss compares that metric, and release times are as the company announced them. Fiscal quarters read 2QFY26: quarter, then the fiscal year as the company names it (Japanese companies by the year it starts). Times are Singapore time, with US daylight saving applied.</p>
+    <p class="mk-note">Equity: an upcoming date shows (Confirmed) once the company has announced it, otherwise (Estimate); reported dates show (Confirmed). Consensus covers quarterly and fiscal-year revenue and adjusted EPS, and the beat or miss compares adjusted EPS with consensus. Credit: names under credit coverage; besides revenue and EPS, each has the consensus for its credit metric (net income, operating income or EBITDA), the beat or miss compares that metric, and release times are as the company announced them. Fiscal quarters read 2QFY26: quarter, then the fiscal year as the company names it (Japanese companies by the year it starts). Macro: US data releases (the actual as first published, against the consensus before the release, and the previous figure as revised at the time; Above or Below is not good or bad), FOMC meetings and rate decisions, speeches by FOMC participants, FOMC minutes, Beige Book, policy and political events, Treasury refunding, budget and coupon auctions (high yield), EIA crude inventories, the Fed balance sheet, the EIA energy outlook and the USDA WASDE report. Macro events sit on their Singapore date, with New York time alongside; all-day events on their US date. Upcoming lists the next 7 days of Macro events; the calendar keeps them for a rolling year (the past 12 months, and FOMC meetings 12 months ahead). Times are Singapore time, with US daylight saving applied.</p>
   </div>
 </div>
 
@@ -887,6 +887,23 @@
   const beat = (e, id, f = 'eps_surprise_pct') => mark(el('span', 'cal-beat ' + (e[f] >= 0 ? 'mk-up' : 'mk-down'),
     (e[f] >= 0 ? 'Beat ' : 'Miss ') + sign(e[f]) + Math.abs(e[f]).toFixed(1) + '%'), f, id);
   const credit = (e) => e.category === 'Credit';
+  const macro = (e) => e.category === 'Macro';
+  // A macro figure by its unit: pct 3.4%, rate 4.00%, yld 4.291%, k 29K, m 7.079M, bbl +0.9M bbl, idx 54.5, usdbn USD−27bn, usdtn USD6.754tn
+  const fMac = (v, u) => {
+    const a = Math.abs(v), mi = v < 0 ? '−' : '';
+    const n = (d) => a.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
+    if (u === 'pct') return mi + n(1) + '%';
+    if (u === 'rate') return mi + n(2) + '%';
+    if (u === 'yld') return mi + n(3) + '%';
+    if (u === 'k') return mi + n(0) + 'K';
+    if (u === 'm') return mi + a.toLocaleString('en-US', { maximumFractionDigits: 3 }) + 'M';
+    if (u === 'bbl') return (v > 0 ? '+' : mi) + n(1) + 'M bbl';
+    if (u === 'usdbn') return 'USD' + mi + n(0) + 'bn';
+    if (u === 'usdtn') return 'USD' + mi + n(3) + 'tn';
+    return mi + n(1);
+  };
+  // Actual against consensus, without a good / bad colour: Above, Below or In line
+  const vsCons = (m) => el('span', 'cal-beat', Math.abs(m.a - m.f) < 1e-9 ? 'In line' : m.a > m.f ? 'Above' : 'Below');
   const catCls = (e) => (e.category ? ' cat-' + e.category.toLowerCase() : '');  // category colour, see CSS
   // "(Confirmed)" or "(Estimate)" after a results date
   const dst = (e, id) => {
@@ -903,11 +920,13 @@
   };
   const hm = (h, m = 0) => String(((h % 24) + 24) % 24).padStart(2, '0') + ':' + String(m).padStart(2, '0');
   // [session code, label, ET start hour, minute, ET end hour, minute]; ASIA = an Asian company's announced release time
-  const SESSIONS = [['ASIA', 'Asia'], ['BMO', 'Pre-market', 4, 0, 9, 30], ['DMH', 'Intraday', 9, 30, 16, 0], ['AMC', 'After close', 16, 0, 20, 0], ['', 'Time not set']];
-  const KNOWN = new Set(['ASIA', 'BMO', 'DMH', 'AMC']);
-  const sessWindow = (s, d) => { if (s[0] === 'ASIA') return 'release times in SGT'; if (s.length < 3) return ''; const sh = 8 - etOffset(d); return hm(s[2] + sh, s[3]) + '–' + hm(s[4] + sh, s[5]) + ' SGT'; };
+  // US = the Macro events (US data releases, Fed, policy, Treasury), at their own times
+  const SESSIONS = [['ASIA', 'Asia'], ['BMO', 'Pre-market', 4, 0, 9, 30], ['DMH', 'Intraday', 9, 30, 16, 0], ['AMC', 'After close', 16, 0, 20, 0], ['US', 'US macro'], ['', 'Time not set']];
+  const KNOWN = new Set(['ASIA', 'BMO', 'DMH', 'AMC', 'US']);
+  const sessWindow = (s, d) => { if (s[0] === 'ASIA' || s[0] === 'US') return 'times in SGT'; if (s.length < 3) return ''; const sh = 8 - etOffset(d); return hm(s[2] + sh, s[3]) + '–' + hm(s[4] + sh, s[5]) + ' SGT'; };
   const timeText = (e) => {
     const sh = 8 - etOffset(e.date);
+    if (macro(e)) return e.time_sgt ? [fDow(e.date) + ' ' + e.time_sgt, 'SGT · ' + e.time_local] : [null, e.ticker === 'FOMC' ? 'Time not listed yet (New York date)' : 'All day (US date)'];
     if (e.session === 'ASIA' && e.time_sgt) return [fDow(e.date) + ' ' + e.time_sgt, 'SGT · ' + e.time_local + ' local'];
     if (e.session === 'AMC') return [fDow(addDays(e.date, Math.floor((16 + sh) / 24))) + ' ' + hm(16 + sh) + '+', 'SGT · after the 16:00 ET close'];
     if (e.session === 'BMO') return [fDow(e.date) + ' by ' + hm(9 + sh, 30), 'SGT · before the 09:30 ET open'];
@@ -920,7 +939,11 @@
     const s = dash.data('earnings');
     if (s.status === 'ok' && s.data !== src) {
       src = s.data;
-      events = s.data.map((r) => { const o = { ...r }; NUMS.forEach((k) => (o[k] = num(r[k]))); o.date = parse(r.event_date); return o; })
+      events = s.data.map((r) => {
+        const o = { ...r }; NUMS.forEach((k) => (o[k] = num(r[k]))); o.date = parse(r.event_date);
+        try { o.ms = r.macro ? JSON.parse(r.macro) : []; } catch (err) { o.ms = []; }
+        return o;
+      })
         .filter((o) => o.date).sort((a, b) => a.date - b.date || a.ticker.localeCompare(b.ticker));
     }
     return s.status;
@@ -960,7 +983,7 @@
     if (dISO === p.day) b.classList.add('cal-sel');
     if (list.length) b.classList.add('cal-has');
     b.setAttribute('aria-pressed', String(dISO === p.day));
-    b.setAttribute('aria-label', fDayLong(d) + (list.length ? ', earnings: ' + list.map((e) => e.ticker + (e.date_status === 'Estimate' ? ' (estimate)' : '')).join(', ') : ', no events'));
+    b.setAttribute('aria-label', fDayLong(d) + (list.length ? ', events: ' + list.map((e) => e.ticker + (e.date_status === 'Estimate' ? ' (estimate)' : '')).join(', ') : ', no events'));
     const foot = el('div', 'cal-foot');
     foot.append(el('span', 'cal-cnt', list.length ? String(list.length) : ' '));
     if (list.length) {
@@ -990,7 +1013,41 @@
     return subs;
   };
 
+  function macroCard(e) {
+    const id = e.event_id;
+    const c = el('article', 'cal-ev' + catCls(e)); c.id = 'cal-ev-' + id.replace(/[^A-Za-z0-9]/g, '');
+    const top = el('div', 'cal-ev-top');
+    const title = el('span', 'cal-ev-title');
+    title.append(mark(el('span', null, e.name), 'name', id));
+    if (e.fiscal_period) title.append(' · ', mark(el('span', null, e.fiscal_period), 'fiscal_period', id));
+    top.append(mark(el('span', 'cal-ticker', e.ticker), 'ticker', id), title, mark(el('span', 'mk-small', e.kind), 'kind', id),
+      mark(el('span', 'cal-status' + (e.status === 'Expected' ? ' cal-exp' : ''), e.status), 'status', id));
+    const [big, rest] = timeText(e);
+    const time = el('div', 'cal-time');
+    if (big) time.append(el('b', null, big));
+    time.append(el('span', null, rest));
+    c.append(top, time);
+    if (e.ms.length) {
+      const dl = el('dl', 'cal-kv');
+      e.ms.forEach((m) => {
+        const subs = [];
+        if (m.a != null) {
+          if (m.f != null) subs.push('vs consensus ' + fMac(m.f, m.u) + ' ', vsCons(m));
+          if (m.p != null) subs.push((subs.length ? ' · ' : '') + 'previous ' + fMac(m.p, m.u));
+          kv(dl, m.l, mark(el('span', null, fMac(m.a, m.u)), 'macro', id), subs);
+        } else {
+          if (m.p != null) subs.push('previous ' + fMac(m.p, m.u));
+          kv(dl, m.l + (m.f != null ? ' consensus' : ''), mark(el('span', null, m.f != null ? fMac(m.f, m.u) : e.status === 'Expected' ? 'No consensus yet' : 'Not available'), 'macro', id), subs);
+        }
+      });
+      c.append(dl);
+    }
+    if (e.note) c.append(mark(el('p', 'mk-note', e.note), 'note', id));
+    return c;
+  }
+
   function evCard(e) {
+    if (macro(e)) return macroCard(e);
     const id = e.event_id;
     const c = el('article', 'cal-ev' + catCls(e)); c.id = 'cal-ev-' + id.replace(/[^A-Za-z0-9]/g, '');
     const top = el('div', 'cal-ev-top');
@@ -1051,13 +1108,13 @@
     head.append(el('h2', null, fDay(d)));
     if (d.getUTCDay() === 0 || d.getUTCDay() === 6) head.append(el('span', 'cal-pill', 'Market closed'));
     if (dISO === p.today) head.append(el('span', 'cal-pill', 'Today'));
-    const cnt = el('p', 'mk-note', list.length ? list.length + (list.length === 1 ? ' event' : ' events') : 'No earnings');
+    const cnt = el('p', 'mk-note', list.length ? list.length + (list.length === 1 ? ' event' : ' events') : 'No events');
     box.replaceChildren(head, cnt);
     if (!list.length) {
       const next = evs.find((e) => e.event_date > dISO);
       if (next) {
         const line = el('p', 'cal-empty', 'Next: ');
-        const a = el('button', 'cal-link', next.ticker + ' ' + next.fiscal_period + ' on ' + fDay(next.date)); a.type = 'button';
+        const a = el('button', 'cal-link', next.ticker + (next.fiscal_period ? ' ' + next.fiscal_period : '') + ' on ' + fDay(next.date)); a.type = 'button';
         a.addEventListener('click', () => { scrollTo = next.event_date; pick(next.event_date); });
         line.append(a);
         box.append(line);
@@ -1083,7 +1140,8 @@
   }
 
   function drawSide(evs, p) {
-    const up = evs.filter((e) => e.status === 'Expected' && e.event_date >= p.today);
+    const soon = iso(addDays(parse(p.today), 7));  // Macro events: the next 7 days (user, 2026-10-26)
+    const up = evs.filter((e) => e.status === 'Expected' && e.event_date >= p.today && (!macro(e) || e.event_date <= soon));
     const box = document.querySelector('#cal-next-list .cal-items');
     box.replaceChildren(...(up.length ? up.map((e) => {
       const id = e.event_id;
@@ -1098,6 +1156,8 @@
       if (e.date_status) sub.append(dst(e, id));
       const cons = el('span', 'mk-small');
       if (e.rev_cons_bn != null) cons.append('Rev ', mark(el('span', null, fBn(e.rev_cons_bn, e.currency)), 'rev_cons_bn', id));
+      const mf = macro(e) && e.ms.find((m) => m.f != null);
+      if (mf) cons.append(mf.l + ' consensus ', mark(el('span', null, fMac(mf.f, mf.u)), 'macro', id));
       if (e.metric_cons_bn != null) cons.append(cons.childNodes.length ? ' · ' : '', e.metric_label + ' ', mark(el('span', null, fBn(e.metric_cons_bn, e.currency)), 'metric_cons_bn', id));
       else if (e.eps_cons != null) cons.append(cons.childNodes.length ? ' · ' : '', 'EPS ', mark(el('span', null, fEps(e.eps_cons)), 'eps_cons', id));
       body.append(top, sub);
@@ -1107,7 +1167,7 @@
       return b;
     }) : [el('p', 'cal-empty', 'No dates announced yet.')]));
 
-    const rec = evs.filter((e) => e.status === 'Reported').slice(-4).reverse();
+    const rec = evs.filter((e) => e.status === 'Reported' || (p.cat === 'Macro' && e.status === 'Released' && e.ms.some((m) => m.a != null) && e.event_date <= p.today)).slice(-4).reverse();
     const rbox = document.querySelector('#cal-recent .cal-items');
     rbox.replaceChildren(...(rec.length ? rec.map((e) => {
       const id = e.event_id;
@@ -1118,6 +1178,11 @@
       const bf = e.metric_surprise_pct != null ? 'metric_surprise_pct' : 'eps_surprise_pct';
       if (e[bf] != null) { const s = beat(e, id, bf); s.style.marginLeft = 'auto'; top.append(s); }
       const sub = el('span', 'mk-small');
+      const ma = macro(e) && e.ms.find((m) => m.a != null);
+      if (ma) {
+        sub.append(ma.l + ' ', mark(el('span', null, fMac(ma.a, ma.u)), 'macro', id));
+        if (ma.f != null) { sub.append(' vs ' + fMac(ma.f, ma.u)); const s = vsCons(ma); s.style.marginLeft = 'auto'; top.append(s); }
+      }
       if (e.rev_actual_bn != null) sub.append('Rev ', mark(el('span', null, fBn(e.rev_actual_bn, e.currency)), 'rev_actual_bn', id));
       if (e.metric_actual_bn != null) {
         sub.append(' · ' + e.metric_label + ' ', mark(el('span', null, fBn(e.metric_actual_bn, e.currency)), 'metric_actual_bn', id));
