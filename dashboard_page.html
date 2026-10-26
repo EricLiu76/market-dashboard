@@ -855,7 +855,7 @@
   const root = document.getElementById('calendar');
   const NUMS = ['rev_actual_bn', 'eps_gaap', 'eps_adj_actual', 'eps_surprise_pct', 'rev_cons_bn', 'rev_cons_low_bn', 'rev_cons_high_bn',
     'rev_cons_n', 'eps_cons', 'eps_cons_low', 'eps_cons_high', 'eps_cons_n', 'fy_eps_cons', 'fy_eps_low', 'fy_eps_high', 'fy_eps_n',
-    'fy_rev_cons_bn', 'fy_rev_low_bn', 'fy_rev_high_bn', 'fy_rev_n'];
+    'fy_rev_cons_bn', 'fy_rev_low_bn', 'fy_rev_high_bn', 'fy_rev_n', 'metric_actual_bn', 'metric_cons_bn', 'metric_surprise_pct', 'fy_metric_cons_bn'];
   const DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   const parse = d3.utcParse('%Y-%m-%d');
   const iso = (d) => d.toISOString().slice(0, 10);
@@ -873,10 +873,12 @@
   const mark = (e, field, id) => { e.setAttribute('data-source', 'earnings'); e.setAttribute('data-field', field); e.setAttribute('data-where', 'event_id=' + encodeURIComponent(id)); return e; };
   const sign = (v) => (v > 0 ? '+' : v < 0 ? '−' : '');
   // Revenue is in the company's reporting currency (TWD for TSMC, KRW for SK hynix, EUR for Nokia)
-  const fBn = (v, ccy) => { const n = v >= 10 ? 1 : 2; return (ccy || 'USD') + v.toLocaleString('en-US', { minimumFractionDigits: n, maximumFractionDigits: n }) + 'bn'; };
+  const fBn = (v, ccy) => { const n = Math.abs(v) >= 10 ? 1 : 2; return (ccy || 'USD') + (v < 0 ? '−' : '') + Math.abs(v).toLocaleString('en-US', { minimumFractionDigits: n, maximumFractionDigits: n }) + 'bn'; };
   const fEps = (v) => v.toFixed(2);
-  const beat = (e, id) => mark(el('span', 'cal-beat ' + (e.eps_surprise_pct >= 0 ? 'mk-up' : 'mk-down'),
-    (e.eps_surprise_pct >= 0 ? 'Beat ' : 'Miss ') + sign(e.eps_surprise_pct) + Math.abs(e.eps_surprise_pct).toFixed(1) + '%'), 'eps_surprise_pct', id);
+  // Beat / miss against consensus: EPS, or a Credit name's metric (metric_surprise_pct)
+  const beat = (e, id, f = 'eps_surprise_pct') => mark(el('span', 'cal-beat ' + (e[f] >= 0 ? 'mk-up' : 'mk-down'),
+    (e[f] >= 0 ? 'Beat ' : 'Miss ') + sign(e[f]) + Math.abs(e[f]).toFixed(1) + '%'), f, id);
+  const credit = (e) => e.category === 'Credit';
   // "(Confirmed)" or "(Estimate)" after a results date
   const dst = (e, id) => {
     const s = el('span', 'cal-dst' + (e.date_status === 'Estimate' ? ' cal-est' : ''), '(');
@@ -891,15 +893,16 @@
     return d.getTime() >= sunday(2, 2) && d.getTime() < sunday(10, 1) ? -4 : -5;
   };
   const hm = (h, m = 0) => String(((h % 24) + 24) % 24).padStart(2, '0') + ':' + String(m).padStart(2, '0');
-  // [session code, label, ET start hour, minute, ET end hour, minute]
-  const SESSIONS = [['BMO', 'Pre-market', 4, 0, 9, 30], ['DMH', 'Intraday', 9, 30, 16, 0], ['AMC', 'After close', 16, 0, 20, 0], ['', 'Time not set']];
-  const KNOWN = new Set(['BMO', 'DMH', 'AMC']);
-  const sessWindow = (s, d) => { if (s.length < 3) return ''; const sh = 8 - etOffset(d); return hm(s[2] + sh, s[3]) + '–' + hm(s[4] + sh, s[5]) + ' SGT'; };
+  // [session code, label, ET start hour, minute, ET end hour, minute]; ASIA = an Asian company's announced release time
+  const SESSIONS = [['ASIA', 'Asia'], ['BMO', 'Pre-market', 4, 0, 9, 30], ['DMH', 'Intraday', 9, 30, 16, 0], ['AMC', 'After close', 16, 0, 20, 0], ['', 'Time not set']];
+  const KNOWN = new Set(['ASIA', 'BMO', 'DMH', 'AMC']);
+  const sessWindow = (s, d) => { if (s[0] === 'ASIA') return 'release times in SGT'; if (s.length < 3) return ''; const sh = 8 - etOffset(d); return hm(s[2] + sh, s[3]) + '–' + hm(s[4] + sh, s[5]) + ' SGT'; };
   const timeText = (e) => {
     const sh = 8 - etOffset(e.date);
+    if (e.session === 'ASIA' && e.time_sgt) return [fDow(e.date) + ' ' + e.time_sgt, 'SGT · ' + e.time_local + ' local'];
     if (e.session === 'AMC') return [fDow(addDays(e.date, Math.floor((16 + sh) / 24))) + ' ' + hm(16 + sh) + '+', 'SGT · after the 16:00 ET close'];
     if (e.session === 'BMO') return [fDow(e.date) + ' by ' + hm(9 + sh, 30), 'SGT · before the 09:30 ET open'];
-    return [null, 'Time not set'];
+    return [null, credit(e) ? 'Time not announced' : 'Time not set'];
   };
 
   // ---------- data and state ----------
@@ -997,26 +1000,36 @@
     const pe = mark(el('span', null, fYM(parse(e.period_end + '-01'))), 'period_end', id);
     if (e.status === 'Reported') {
       if (e.rev_actual_bn != null) kv(dl, 'Revenue', mark(el('span', null, fBn(e.rev_actual_bn, e.currency)), 'rev_actual_bn', id));
+      if (e.metric_actual_bn != null) {
+        const subs = [];
+        if (e.metric_cons_bn != null) subs.push('vs consensus ', mark(el('span', null, fBn(e.metric_cons_bn, e.currency)), 'metric_cons_bn', id), ' ');
+        if (e.metric_surprise_pct != null) subs.push(beat(e, id, 'metric_surprise_pct'));
+        kv(dl, e.metric_label, mark(el('span', null, fBn(e.metric_actual_bn, e.currency)), 'metric_actual_bn', id), subs);
+      }
       if (e.eps_adj_actual != null) {
         const subs = [];
         if (e.eps_cons != null) subs.push('vs consensus ', mark(el('span', null, fEps(e.eps_cons)), 'eps_cons', id), ' ');
         if (e.eps_surprise_pct != null) subs.push(beat(e, id));
-        kv(dl, 'Adjusted EPS', mark(el('span', null, fEps(e.eps_adj_actual)), 'eps_adj_actual', id), subs);
+        kv(dl, credit(e) ? 'EPS' : 'Adjusted EPS', mark(el('span', null, fEps(e.eps_adj_actual)), 'eps_adj_actual', id), subs);
       }
       if (e.eps_gaap != null) kv(dl, 'GAAP diluted EPS', mark(el('span', null, fEps(e.eps_gaap)), 'eps_gaap', id));
       kv(dl, 'Quarter ended', pe);
     } else {
+      const adj = credit(e) ? '' : ' (adjusted)';
       if (e.rev_cons_bn != null) kv(dl, 'Revenue consensus', mark(el('span', null, fBn(e.rev_cons_bn, e.currency)), 'rev_cons_bn', id),
         consSubs(e, id, 'rev_cons_low_bn', 'rev_cons_high_bn', 'rev_cons_n', fBn));
-      if (e.eps_cons != null) kv(dl, 'EPS consensus (adjusted)', mark(el('span', null, fEps(e.eps_cons)), 'eps_cons', id),
+      if (e.metric_cons_bn != null) kv(dl, e.metric_label + ' consensus', mark(el('span', null, fBn(e.metric_cons_bn, e.currency)), 'metric_cons_bn', id));
+      if (e.eps_cons != null) kv(dl, 'EPS consensus' + adj, mark(el('span', null, fEps(e.eps_cons)), 'eps_cons', id),
         consSubs(e, id, 'eps_cons_low', 'eps_cons_high', 'eps_cons_n', fEps));
       if (e.fy_rev_cons_bn != null) kv(dl, e.fy_label + ' revenue consensus', mark(el('span', null, fBn(e.fy_rev_cons_bn, e.currency)), 'fy_rev_cons_bn', id),
         consSubs(e, id, 'fy_rev_low_bn', 'fy_rev_high_bn', 'fy_rev_n', fBn));
-      if (e.fy_eps_cons != null) kv(dl, e.fy_label + ' EPS consensus (adjusted)', mark(el('span', null, fEps(e.fy_eps_cons)), 'fy_eps_cons', id),
+      if (e.fy_metric_cons_bn != null) kv(dl, e.fy_label + ' ' + e.metric_label.toLowerCase() + ' consensus', mark(el('span', null, fBn(e.fy_metric_cons_bn, e.currency)), 'fy_metric_cons_bn', id));
+      if (e.fy_eps_cons != null) kv(dl, e.fy_label + ' EPS consensus' + adj, mark(el('span', null, fEps(e.fy_eps_cons)), 'fy_eps_cons', id),
         consSubs(e, id, 'fy_eps_low', 'fy_eps_high', 'fy_eps_n', fEps));
       kv(dl, 'Quarter ending', pe);
     }
     c.append(top, time, dl);
+    if (e.note && e.status !== 'Reported') c.append(mark(el('p', 'mk-note', e.note), 'note', id));
     return c;
   }
 
@@ -1041,7 +1054,8 @@
       return;
     }
     SESSIONS.forEach((s) => {
-      const items = list.filter((e) => (KNOWN.has(e.session) ? e.session : '') === s[0]);
+      const items = list.filter((e) => (KNOWN.has(e.session) ? e.session : '') === s[0])
+        .sort((a, b) => (a.time_sgt || '').localeCompare(b.time_sgt || ''));
       if (!items.length) return;
       const g = el('div', 'cal-sess');
       const h = el('div', 'cal-sess-h');
@@ -1073,7 +1087,8 @@
       if (e.date_status) sub.append(dst(e, id));
       const cons = el('span', 'mk-small');
       if (e.rev_cons_bn != null) cons.append('Rev ', mark(el('span', null, fBn(e.rev_cons_bn, e.currency)), 'rev_cons_bn', id));
-      if (e.eps_cons != null) cons.append(e.rev_cons_bn != null ? ' · ' : '', 'EPS ', mark(el('span', null, fEps(e.eps_cons)), 'eps_cons', id));
+      if (e.metric_cons_bn != null) cons.append(cons.childNodes.length ? ' · ' : '', e.metric_label + ' ', mark(el('span', null, fBn(e.metric_cons_bn, e.currency)), 'metric_cons_bn', id));
+      else if (e.eps_cons != null) cons.append(cons.childNodes.length ? ' · ' : '', 'EPS ', mark(el('span', null, fEps(e.eps_cons)), 'eps_cons', id));
       body.append(top, sub);
       if (cons.childNodes.length) body.append(cons);
       b.append(dateBlock(e.date), body);
@@ -1089,10 +1104,14 @@
       const body = el('span', 'cal-item-body');
       const top = el('span', 'cal-item-top');
       top.append(mark(el('span', 'cal-ticker', e.ticker), 'ticker', id), mark(el('span', 'cal-ev-title', e.fiscal_period), 'fiscal_period', id));
-      if (e.eps_surprise_pct != null) { const s = beat(e, id); s.style.marginLeft = 'auto'; top.append(s); }
+      const bf = e.metric_surprise_pct != null ? 'metric_surprise_pct' : 'eps_surprise_pct';
+      if (e[bf] != null) { const s = beat(e, id, bf); s.style.marginLeft = 'auto'; top.append(s); }
       const sub = el('span', 'mk-small');
       if (e.rev_actual_bn != null) sub.append('Rev ', mark(el('span', null, fBn(e.rev_actual_bn, e.currency)), 'rev_actual_bn', id));
-      if (e.eps_adj_actual != null) {
+      if (e.metric_actual_bn != null) {
+        sub.append(' · ' + e.metric_label + ' ', mark(el('span', null, fBn(e.metric_actual_bn, e.currency)), 'metric_actual_bn', id));
+        if (e.metric_cons_bn != null) sub.append(' vs ', mark(el('span', null, fBn(e.metric_cons_bn, e.currency)), 'metric_cons_bn', id));
+      } else if (e.eps_adj_actual != null) {
         sub.append(' · Adj. EPS ', mark(el('span', null, fEps(e.eps_adj_actual)), 'eps_adj_actual', id));
         if (e.eps_cons != null) sub.append(' vs ', mark(el('span', null, fEps(e.eps_cons)), 'eps_cons', id));
       }
@@ -1151,10 +1170,11 @@
     const status = load();
     const cats = [...new Set(events.map((e) => e.category).filter(Boolean))];
     segButtons(document.getElementById('cal-cat'), [[null, 'All'], ...cats.map((c) => [c, c])], p.cat, (v) => dash.setParams({ cc: v, cn: null }));
-    // Country filter applies to Equity events only, countries in country_order
+    // Country filter applies to company events (Equity and Credit), countries in country_order
     const countryBox = document.getElementById('cal-country');
-    const eq = events.filter((e) => e.category === 'Equity');
-    countryBox.hidden = (p.cat && p.cat !== 'Equity') || !eq.length;
+    const COS = ['Equity', 'Credit'];
+    const eq = events.filter((e) => COS.includes(e.category) && (!p.cat || e.category === p.cat));
+    countryBox.hidden = (p.cat && !COS.includes(p.cat)) || !eq.length;
     const countries = d3.groups(eq, cty).map(([c, es]) => [c, d3.min(es, (e) => +e.country_order || 999)])
       .sort((a, b) => a[1] - b[1] || a[0].localeCompare(b[0]));
     segButtons(countryBox, [[null, 'All countries'], ...countries.map(([c]) => [c, c])], p.country, (v) => dash.setParams({ cn: v }));
