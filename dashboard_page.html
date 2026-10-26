@@ -945,7 +945,7 @@
         try { o.ms = r.macro ? JSON.parse(r.macro) : []; } catch (err) { o.ms = []; }
         return o;
       })
-        .filter((o) => o.date).sort((a, b) => a.date - b.date || a.ticker.localeCompare(b.ticker));
+        .filter((o) => o.date).sort((a, b) => a.date - b.date || (a.time_sgt || '').localeCompare(b.time_sgt || '') || a.ticker.localeCompare(b.ticker));
     }
     return s.status;
   };
