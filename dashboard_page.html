@@ -99,7 +99,7 @@
 .mk-icon { font: inherit; display: inline-grid; place-items: center; width: 2rem; height: 2rem; padding: 0; border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); background: transparent; color: var(--color-fg-muted); cursor: pointer; }
 .mk-icon:hover { color: var(--color-fg); border-color: var(--color-fg-muted); }
 .mk-icon svg { width: 1.05rem; height: 1.05rem; }
-.mk-dlg { box-sizing: border-box; width: min(24rem, calc(100vw - 2rem)); padding: 0; border: 1px solid var(--cds-border); border-radius: calc(var(--cds-radius) * 2); background: var(--color-panel); color: var(--color-fg); box-shadow: var(--cds-shadow-popover); }
+.mk-dlg { box-sizing: border-box; width: min(24rem, calc(100vw - 2rem)); margin: 0; inset: auto; overflow: auto; padding: 0; border: 1px solid var(--cds-border); border-radius: calc(var(--cds-radius) * 2); background: var(--color-panel); color: var(--color-fg); box-shadow: var(--cds-shadow-popover); }
 .mk-dlg::backdrop { background: rgba(0, 0, 0, .4); }
 .mk-dlg-head { display: flex; align-items: center; justify-content: space-between; gap: var(--cds-gap-md); padding: var(--cds-pad-md) var(--cds-pad-lg); border-bottom: 1px solid var(--color-border-line); }
 .mk-dlg-head h2 { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); }
@@ -341,7 +341,19 @@
     return b;
   }));
   apply(saved);
-  document.getElementById('settings-open').addEventListener('click', () => dlg.showModal());
+  // Open just below the Settings icon with right edges aligned, kept 16px inside the window
+  const btn = document.getElementById('settings-open');
+  const place = () => {
+    if (!dlg.open) return;
+    const r = btn.getBoundingClientRect(), w = dlg.offsetWidth, gap = 16;
+    const top = Math.max(gap, r.bottom + 8);
+    dlg.style.top = top + 'px';
+    dlg.style.left = Math.max(gap, Math.min(r.right - w, document.documentElement.clientWidth - gap - w)) + 'px';
+    dlg.style.maxHeight = (window.innerHeight - top - gap) + 'px';
+  };
+  btn.addEventListener('click', () => { dlg.showModal(); place(); });
+  window.addEventListener('resize', place);
+  window.addEventListener('scroll', place, { passive: true });
   document.getElementById('settings-close').addEventListener('click', () => dlg.close());
   dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); }); // a click on the backdrop
 })();
