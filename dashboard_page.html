@@ -4,6 +4,14 @@
 .mk-title { margin: 0; font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); text-wrap: balance; }
 .mk-lede { margin: 0; max-width: 72ch; color: var(--color-fg-muted); line-height: 1.5; }
 .mk-lede .mk-v { color: var(--color-fg); font-weight: var(--cds-font-weight-medium); }
+/* Daily brief: the latest day's moves and signals, above the range sentence */
+.mk-brief { display: grid; gap: var(--cds-gap-xs); max-width: 80ch; line-height: 1.55; }
+.mk-brief p { margin: 0; }
+.mk-brief .mk-v { font-weight: var(--cds-font-weight-medium); }
+.mk-brief .mk-bl { font-weight: var(--cds-font-weight-medium); }
+.mk-brief .mk-bn { color: inherit; text-decoration: underline; text-decoration-color: var(--color-border-line); text-underline-offset: 2px; cursor: pointer; }
+.mk-brief .mk-bn:hover, .mk-brief .mk-bn:focus-visible { text-decoration-color: currentColor; }
+.mk-brief .mk-bx { color: var(--color-fg-muted); }
 .mk-bar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--cds-gap-sm) var(--cds-gap-md); }
 .mk-ctl { display: flex; flex-wrap: wrap; align-items: center; gap: var(--cds-gap-sm); }
 .mk-label { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); text-transform: uppercase; letter-spacing: .06em; }
@@ -229,6 +237,10 @@
 
   <div class="mk" id="markets" role="tabpanel" aria-labelledby="tab-markets">
   <header class="mk-head" id="summary">
+    <div class="mk-brief" id="brief" aria-label="Latest day">
+      <p id="brief-moves"><span class="dash-skeleton">—</span></p>
+      <div id="brief-signals"></div>
+    </div>
     <p class="mk-lede" id="lede"><span class="dash-skeleton">—</span></p>
     <div class="mk-bar">
       <div class="mk-ctl"><span class="mk-label">Range</span><div class="mk-seg" id="range" role="group" aria-label="Range"></div></div>
@@ -604,6 +616,71 @@
     lede.replaceChildren(...parts.map((p) => (typeof p === 'string' ? document.createTextNode(p) : p)));
   }
 
+  // ---------- daily brief ----------
+  // The latest day's moves for six key markets, then the day's notable signals (the same rules as the
+  // signal boxes below: 52-week highs and lows, moves over 2 sigma, 200-day line crosses). Names open the chart.
+  const BRIEF = [
+    ['S&P 500', 'the S&P 500'], ['Nasdaq Composite', 'the Nasdaq Composite'], ['CBOE VIX', 'the VIX'],
+    ['Gold', 'gold'], ['Brent Crude', 'Brent crude'], ['US Treasury 10Y', 'the US 10Y Treasury yield'],
+  ];
+  const fmtDay = d3.utcFormat('%a %-d %b');
+  function drawBrief(rows) {
+    const movesEl = document.getElementById('brief-moves');
+    const sigEl = document.getElementById('brief-signals');
+    const byName = new Map(rows.map((r) => [r.name, r]));
+    const nameLink = (r, text = r.name) => {
+      const a = el('a', 'mk-bn', text); a.href = '#'; a.setAttribute('role', 'button');
+      a.addEventListener('click', (ev) => { ev.preventDefault(); openDetail(r.code); });
+      return a;
+    };
+    const num = (r, field, text) => mark(el('span', 'mk-v ' + tone(r, r[field]), text), field, r.code);
+    const amount = (r) => isBp(r) ? Math.abs(r.chg_1d).toFixed(1) + 'bp' : Math.abs(r.chg_1d).toFixed(2) + '%';
+    const items = BRIEF.map(([name, label]) => [byName.get(name), label]).filter(([r]) => r && r.chg_1d != null);
+    if (!items.length) { movesEl.replaceChildren(); sigEl.replaceChildren(); return; }
+    const day = items[0][0].as_of;
+    const parts = ['On ' + fmtDay(parseDay(day)) + ', '];
+    const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+    items.forEach(([r, label], i) => {
+      const verb = r.chg_1d > 0 ? ' rose ' : r.chg_1d < 0 ? ' fell ' : ' was unchanged';
+      const startsSentence = i === 3;
+      parts.push(nameLink(r, startsSentence ? cap(label) : label), verb);
+      if (r.chg_1d !== 0) parts.push(num(r, 'chg_1d', amount(r)), ' to ');
+      else parts.push(' at ');
+      parts.push(mark(el('span', 'mk-v', fmtLast(r)), 'last', r.code));
+      if (r.as_of !== day) parts.push(el('span', 'mk-bx', ' (' + fmtDay(parseDay(r.as_of)) + ')'));
+      parts.push(i === 2 || i === items.length - 1 ? '. ' : i === 1 || i === 4 ? ' and ' : ', ');
+    });
+    movesEl.replaceChildren(...parts.map((p) => (typeof p === 'string' ? document.createTextNode(p) : p)));
+
+    // Signals, one line each, only when there is something to say
+    const line = (label, list, extra) => {
+      if (!list.length) return null;
+      const p = el('p');
+      p.append(el('span', 'mk-bl', label + ': '));
+      list.forEach((r, i) => {
+        p.append(nameLink(r));
+        const x = extra(r);
+        if (x) p.append(' ', ...x);
+        if (i < list.length - 1) p.append(', ');
+      });
+      p.append('.');
+      return p;
+    };
+    const chg = (r) => [num(r, 'chg_1d', fmtChg(r, r.chg_1d))];
+    const sigma = rows.filter((r) => r.sigma_1d != null && Math.abs(r.sigma_1d) >= 2)
+      .sort((a, b) => Math.abs(b.sigma_1d) - Math.abs(a.sigma_1d));
+    const lines = [
+      line('Unusual moves', sigma, (r) => [num(r, 'chg_1d', fmtChg(r, r.chg_1d)),
+        mark(el('span', 'mk-bx', ' (' + sign(r.sigma_1d) + Math.abs(r.sigma_1d).toFixed(1) + 'σ)'), 'sigma_1d', r.code)]),
+      line('New 52-week highs', rows.filter((r) => r.signal_52w === 'high'), chg),
+      line('New 52-week lows', rows.filter((r) => r.signal_52w === 'low'), chg),
+      line('Crossed above the 200-day line', rows.filter((r) => r.cross_200 === 'up'), () => null),
+      line('Fell below the 200-day line', rows.filter((r) => r.cross_200 === 'down'), () => null),
+    ].filter(Boolean);
+    sigEl.className = 'mk-brief';
+    sigEl.replaceChildren(...(lines.length ? lines : [el('p', 'mk-bx', 'No 52-week highs or lows, unusual moves or 200-day line crosses on the latest day.')]));
+  }
+
   // ---------- signals ----------
   function drawSignals(rows) {
     const fill = (id, items) => {
@@ -898,6 +975,7 @@
     const s = snapshot(), m = master();
     const sections = document.getElementById('sections');
     if (s.status === 'ok') {
+      drawBrief(s.rows);
       drawLede(s.rows, p.range);
       drawSignals(s.rows);
       if (m.status === 'ok') drawSections(s.rows, m.map, p);
