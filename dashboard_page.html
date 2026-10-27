@@ -5,7 +5,8 @@
 .mk-lede { margin: 0; max-width: 72ch; color: var(--color-fg-muted); line-height: 1.5; }
 .mk-lede .mk-v { color: var(--color-fg); font-weight: var(--cds-font-weight-medium); }
 /* Daily brief: the latest day's moves and signals, above the range sentence */
-.mk-brief { display: grid; gap: var(--cds-gap-xs); max-width: 80ch; line-height: 1.55; }
+.mk-brief { display: grid; gap: var(--cds-gap-xs); max-width: var(--mk-brief-max, 80ch); line-height: 1.55; }
+#brief-signals.mk-brief { max-width: none; }
 .mk-brief p { margin: 0; }
 .mk-brief .mk-v { font-weight: var(--cds-font-weight-medium); }
 .mk-brief .mk-bl { font-weight: var(--cds-font-weight-medium); }
@@ -681,6 +682,16 @@
     sigEl.replaceChildren(...(lines.length ? lines : [el('p', 'mk-bx', 'No 52-week highs or lows, unusual moves or 200-day line crosses on the latest day.')]));
   }
 
+  // The summary runs out to the page tabs (Markets / Calendar / Data Status) when they sit beside the title;
+  // on a narrow screen, where the tabs wrap below the title, it takes the full width
+  const fitBrief = () => {
+    const brief = document.getElementById('brief'), tabs = document.querySelector('.mk-top-r');
+    if (!brief || !tabs || !brief.offsetParent) return;
+    const room = tabs.getBoundingClientRect().left - brief.getBoundingClientRect().left - 24;
+    brief.style.setProperty('--mk-brief-max', room > 320 ? room + 'px' : 'none');
+  };
+  window.addEventListener('resize', fitBrief);
+
   // ---------- signals ----------
   function drawSignals(rows) {
     const fill = (id, items) => {
@@ -976,6 +987,7 @@
     const sections = document.getElementById('sections');
     if (s.status === 'ok') {
       drawBrief(s.rows);
+      fitBrief();
       drawLede(s.rows, p.range);
       drawSignals(s.rows);
       if (m.status === 'ok') drawSections(s.rows, m.map, p);
