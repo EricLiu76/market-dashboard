@@ -360,7 +360,8 @@
       <ul class="st-sched">
         <li><b>07:30, Tuesday to Saturday:</b> markets data, with the previous weekday's closes.</li>
         <li><b>10:00, Tuesday to Saturday:</b> catch-up run for closes not yet posted at 07:30.</li>
-        <li>Anything still missing after 10:00 is tried again at the next 07:30 run (after Saturday, on Tuesday).</li>
+        <li><b>16:00, Tuesday to Saturday:</b> final catch-up run for closes still missing at 10:00.</li>
+        <li>Anything still missing after 16:00 is tried again at the next 07:30 run (after Saturday, on Tuesday).</li>
         <li><b>07:30, every day:</b> the Calendar.</li>
       </ul>
     </section>
@@ -1370,7 +1371,8 @@
     const t = new Date(iso), day = sgDay(t);
     const when = day === sgDay(new Date()) ? 'Today' : day === sgDay(new Date(Date.now() + 864e5)) ? 'Tomorrow'
       : t.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', timeZone: TZ });
-    return `${when}, ${hhmm(t)} SGT` + (hhmm(t) === '10:00' ? ' (catch-up)' : '');
+    const label = { '10:00': ' (catch-up)', '16:00': ' (final catch-up)' }[hhmm(t)] || '';
+    return `${when}, ${hhmm(t)} SGT` + label;
   };
   const fmtBuilt = (iso) => {
     const t = new Date(iso);
