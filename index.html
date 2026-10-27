@@ -33,8 +33,9 @@ try { const t = localStorage.getItem('mk-theme'); if (t === 'light' || t === 'da
   --wash-1: rgba(31, 30, 29, .04);
   --wash-2: rgba(31, 30, 29, .09);
 
-  --font-anthropic-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --font-anthropic-serif: ui-serif, Georgia, "Times New Roman", serif;
+  /* All text in Arial (user's choice, 2026-10-27); Helvetica where Arial is missing */
+  --font-anthropic-sans: Arial, "Helvetica Neue", Helvetica, sans-serif;
+  --font-anthropic-serif: Arial, "Helvetica Neue", Helvetica, sans-serif;
   --cds-font-size-caption: .75rem;
   --cds-font-size-body: .875rem;
   --cds-font-size-heading: .9375rem;
