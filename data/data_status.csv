@@ -1,106 +1,107 @@
 code,name,type,subtype,status,shown_date,expected_date,next_run,note,built
-SPX,S&P 500,Broad Market Index,Global Markets,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-DJI,Dow Jones,Broad Market Index,Global Markets,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-IXIC,Nasdaq Composite,Broad Market Index,Global Markets,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-VIX,CBOE VIX,Broad Market Index,Global Markets,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-KS11,KOSPI,Broad Market Index,APAC Markets,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-N225,Nikkei 225,Broad Market Index,APAC Markets,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-TPX,TOPIX,Broad Market Index,APAC Markets,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-HSI,Hang Seng Index,Broad Market Index,APAC Markets,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-000300,CSI 300,Broad Market Index,APAC Markets,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-AS51,S&P/ASX 200,Broad Market Index,APAC Markets,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-FTSE,FTSE 100,Broad Market Index,EMEA Markets,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-GDAXI,DAX,Broad Market Index,EMEA Markets,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-FCHI,CAC 40,Broad Market Index,EMEA Markets,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-FTSEMIB,FTSE MIB,Broad Market Index,EMEA Markets,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-IBEX,IBEX 35,Broad Market Index,EMEA Markets,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-SXXP,STOXX Europe 600,Broad Market Index,EMEA Markets,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-ASE,Athens General (ASE),Broad Market Index,EMEA Markets,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-892000,MSCI EM Latin America,Broad Market Index,LATAM Markets,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-IBOVESPA,Bovespa,Broad Market Index,LATAM Markets,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-MXX,IPC Mexico,Broad Market Index,LATAM Markets,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-US3M,US Treasury 3M,Rates,US Treasuries,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-US2Y,US Treasury 2Y,Rates,US Treasuries,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-US5Y,US Treasury 5Y,Rates,US Treasuries,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-US10Y,US Treasury 10Y,Rates,US Treasuries,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-US30Y,US Treasury 30Y,Rates,US Treasuries,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-TIPS10Y,US Real Yield 10Y (TIPS),Rates,US Treasuries,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-XLK,SPDR Technology,Sector Index,,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-VGT,Vanguard Info Tech,Sector Index,,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-SMH,VanEck Semiconductor,Sector Index,,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-DRAM,Roundhill Memory,Sector Index,,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-DISK,Tema Memory,Sector Index,,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-NCLD,Roundhill Neocloud,Sector Index,,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-IGV,iShares Tech-Software,Sector Index,,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-XLY,SPDR Consumer Discretionary,Sector Index,,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-XRT,SPDR S&P Retail,Sector Index,,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-XLP,SPDR Consumer Staples,Sector Index,,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-XLE,SPDR Energy,Sector Index,,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-XOP,SPDR S&P Oil & Gas E&P,Sector Index,,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-XLF,SPDR Financials,Sector Index,,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-XLV,SPDR Health Care,Sector Index,,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-XBI,SPDR S&P Biotech,Sector Index,,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-XPH,SPDR S&P Pharmaceuticals,Sector Index,,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-XLI,SPDR Industrials,Sector Index,,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-JETS,U.S. Global Jets,Sector Index,,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-SHLD,Global X Defense Tech,Sector Index,,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-XLU,SPDR Utilities,Sector Index,,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-GRID,First Trust Smart Grid,Sector Index,,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-AIPO,Defiance AI & Power Infra,Sector Index,,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-MEME,Roundhill Meme Stock,Sector Index,,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-GC,Gold,Commodities,Precious Metals,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-SI,Silver,Commodities,Precious Metals,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-HG,Copper,Commodities,Non-Ferrous Metals,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-AH,LME Aluminium,Commodities,Non-Ferrous Metals,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-ZS,LME Zinc,Commodities,Non-Ferrous Metals,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-NI,LME Nickel,Commodities,Non-Ferrous Metals,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-FEF,Iron Ore 61% (SGX),Commodities,Ferrous & Battery Metals,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-ACF,Coking Coal (Aus Premium HCC),Commodities,Ferrous & Battery Metals,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-LTH,Lithium Hydroxide (CME),Commodities,Ferrous & Battery Metals,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-LC,Lithium Carbonate (GFEX),Commodities,Ferrous & Battery Metals,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-SPM,Spodumene 6% CIF China (CME),Commodities,Ferrous & Battery Metals,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-CL,WTI Crude,Commodities,Energy,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-B,Brent Crude,Commodities,Energy,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-HO,Diesel (NY Harbor ULSD),Commodities,Energy,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-JET,Jet Fuel (USGC),Commodities,Energy,Weekly release,2026-10-20,,2026-10-29T07:30+08:00,"Published once a week, so up to a week behind; next release 28 Oct (US).",2026-10-27T13:16+08:00
-NG,Natural Gas (Henry Hub),Commodities,Energy,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-NCF,Newcastle Coal,Commodities,Energy,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-SRUUF,Sprott Physical Uranium,Commodities,Uranium,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-URA,Uranium ETF (URA),Commodities,Uranium,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-C,Corn,Commodities,Agriculture,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-W,Wheat,Commodities,Agriculture,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-S,Soybeans,Commodities,Agriculture,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-GOOG,Alphabet (Class C),Equity Stock,Mag 7,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-AMZN,Amazon,Equity Stock,Mag 7,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-AAPL,Apple,Equity Stock,Mag 7,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-META,Meta Platforms,Equity Stock,Mag 7,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-MSFT,Microsoft,Equity Stock,Mag 7,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-NVDA,NVIDIA,Equity Stock,Mag 7,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-TSLA,Tesla,Equity Stock,Mag 7,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-AVGO,Broadcom,Equity Stock,CPU/ASIC,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-MRVL,Marvell Technology,Equity Stock,CPU/ASIC,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-ARM,Arm Holdings,Equity Stock,CPU/ASIC,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-SPCX,SpaceX,Equity Stock,Other Hyperscalers,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-ORCL,Oracle,Equity Stock,Other Hyperscalers,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-TSM,TSMC,Equity Stock,Foundry/WFE,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-LRCX,Lam Research,Equity Stock,Foundry/WFE,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-SKHY,SK hynix,Equity Stock,Memory & Storage,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-MU,Micron,Equity Stock,Memory & Storage,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-SNDK,Sandisk,Equity Stock,Memory & Storage,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-LITE,Lumentum,Equity Stock,Optics,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-COHR,Coherent,Equity Stock,Optics,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-AAOI,Applied Optoelectronics,Equity Stock,Optics,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-ALAB,Astera Labs,Equity Stock,Optics,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-FN,Fabrinet,Equity Stock,Optics,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-GLW,Corning,Equity Stock,Optics,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-NOK,Nokia,Equity Stock,Optics,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-CRWV,CoreWeave,Equity Stock,Neoclouds,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-NBIS,Nebius,Equity Stock,Neoclouds,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-IREN,IREN,Equity Stock,Neoclouds,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-CEG,Constellation Energy,Equity Stock,Power,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-VST,Vistra,Equity Stock,Power,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-BE,Bloom Energy,Equity Stock,Power,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-XE,X-energy,Equity Stock,Nuclear,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-PLTR,Palantir,Equity Stock,Software,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-NOW,ServiceNow,Equity Stock,Software,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
-CRCL,Circle Internet,Equity Stock,Crypto,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:16+08:00
+SPX,S&P 500,Broad Market Index,Global Markets,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+DJI,Dow Jones,Broad Market Index,Global Markets,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+IXIC,Nasdaq Composite,Broad Market Index,Global Markets,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+VIX,CBOE VIX,Broad Market Index,Global Markets,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+KS11,KOSPI,Broad Market Index,APAC Markets,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+N225,Nikkei 225,Broad Market Index,APAC Markets,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+TPX,TOPIX,Broad Market Index,APAC Markets,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+HSI,Hang Seng Index,Broad Market Index,APAC Markets,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+000300,CSI 300,Broad Market Index,APAC Markets,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+AS51,S&P/ASX 200,Broad Market Index,APAC Markets,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+FTSE,FTSE 100,Broad Market Index,EMEA Markets,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+GDAXI,DAX,Broad Market Index,EMEA Markets,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+FCHI,CAC 40,Broad Market Index,EMEA Markets,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+FTSEMIB,FTSE MIB,Broad Market Index,EMEA Markets,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+IBEX,IBEX 35,Broad Market Index,EMEA Markets,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+SXXP,STOXX Europe 600,Broad Market Index,EMEA Markets,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+ASE,Athens General (ASE),Broad Market Index,EMEA Markets,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+892000,MSCI EM Latin America,Broad Market Index,LATAM Markets,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+IBOVESPA,Bovespa,Broad Market Index,LATAM Markets,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+MXX,IPC Mexico,Broad Market Index,LATAM Markets,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+US3M,US Treasury 3M,Rates,US Treasuries,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+US2Y,US Treasury 2Y,Rates,US Treasuries,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+US5Y,US Treasury 5Y,Rates,US Treasuries,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+US10Y,US Treasury 10Y,Rates,US Treasuries,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+US30Y,US Treasury 30Y,Rates,US Treasuries,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+TIPS10Y,US Real Yield 10Y (TIPS),Rates,US Treasuries,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+XLK,SPDR Technology,Sector Index,,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+VGT,Vanguard Info Tech,Sector Index,,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+SMH,VanEck Semiconductor,Sector Index,,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+DRAM,Roundhill Memory,Sector Index,,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+DISK,Tema Memory,Sector Index,,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+NCLD,Roundhill Neocloud,Sector Index,,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+IGV,iShares Tech-Software,Sector Index,,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+XLY,SPDR Consumer Discretionary,Sector Index,,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+XRT,SPDR S&P Retail,Sector Index,,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+XLP,SPDR Consumer Staples,Sector Index,,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+XLE,SPDR Energy,Sector Index,,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+XOP,SPDR S&P Oil & Gas E&P,Sector Index,,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+XLF,SPDR Financials,Sector Index,,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+XLV,SPDR Health Care,Sector Index,,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+XBI,SPDR S&P Biotech,Sector Index,,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+XPH,SPDR S&P Pharmaceuticals,Sector Index,,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+XLI,SPDR Industrials,Sector Index,,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+JETS,U.S. Global Jets,Sector Index,,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+SHLD,Global X Defense Tech,Sector Index,,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+XLU,SPDR Utilities,Sector Index,,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+GRID,First Trust Smart Grid,Sector Index,,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+AIPO,Defiance AI & Power Infra,Sector Index,,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+MEME,Roundhill Meme Stock,Sector Index,,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+GC,Gold,Commodities,Precious Metals,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+SI,Silver,Commodities,Precious Metals,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+PL,Platinum,Commodities,Precious Metals,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+HG,Copper,Commodities,Non-Ferrous Metals,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+AH,LME Aluminium,Commodities,Non-Ferrous Metals,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+ZS,LME Zinc,Commodities,Non-Ferrous Metals,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+NI,LME Nickel,Commodities,Non-Ferrous Metals,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+FEF,Iron Ore 61% (SGX),Commodities,Ferrous & Battery Metals,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+ACF,Coking Coal (Aus Premium HCC),Commodities,Ferrous & Battery Metals,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+LTH,Lithium Hydroxide (CME),Commodities,Ferrous & Battery Metals,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+LC,Lithium Carbonate (GFEX),Commodities,Ferrous & Battery Metals,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+SPM,Spodumene 6% CIF China (CME),Commodities,Ferrous & Battery Metals,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+CL,WTI Crude,Commodities,Energy,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+B,Brent Crude,Commodities,Energy,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+HO,Diesel (NY Harbor ULSD),Commodities,Energy,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+JET,Jet Fuel (USGC),Commodities,Energy,Weekly release,2026-10-20,,2026-10-29T07:30+08:00,"Published once a week, so up to a week behind; next release 28 Oct (US).",2026-10-27T13:37+08:00
+NG,Natural Gas (Henry Hub),Commodities,Energy,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+NCF,Newcastle Coal,Commodities,Energy,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+SRUUF,Sprott Physical Uranium,Commodities,Uranium,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+URA,Uranium ETF (URA),Commodities,Uranium,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+C,Corn,Commodities,Agriculture,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+W,Wheat,Commodities,Agriculture,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+S,Soybeans,Commodities,Agriculture,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+GOOG,Alphabet (Class C),Equity Stock,Mag 7,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+AMZN,Amazon,Equity Stock,Mag 7,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+AAPL,Apple,Equity Stock,Mag 7,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+META,Meta Platforms,Equity Stock,Mag 7,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+MSFT,Microsoft,Equity Stock,Mag 7,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+NVDA,NVIDIA,Equity Stock,Mag 7,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+TSLA,Tesla,Equity Stock,Mag 7,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+AVGO,Broadcom,Equity Stock,CPU/ASIC,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+MRVL,Marvell Technology,Equity Stock,CPU/ASIC,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+ARM,Arm Holdings,Equity Stock,CPU/ASIC,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+SPCX,SpaceX,Equity Stock,Other Hyperscalers,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+ORCL,Oracle,Equity Stock,Other Hyperscalers,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+TSM,TSMC,Equity Stock,Foundry/WFE,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+LRCX,Lam Research,Equity Stock,Foundry/WFE,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+SKHY,SK hynix,Equity Stock,Memory & Storage,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+MU,Micron,Equity Stock,Memory & Storage,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+SNDK,Sandisk,Equity Stock,Memory & Storage,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+LITE,Lumentum,Equity Stock,Optics,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+COHR,Coherent,Equity Stock,Optics,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+AAOI,Applied Optoelectronics,Equity Stock,Optics,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+ALAB,Astera Labs,Equity Stock,Optics,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+FN,Fabrinet,Equity Stock,Optics,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+GLW,Corning,Equity Stock,Optics,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+NOK,Nokia,Equity Stock,Optics,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+CRWV,CoreWeave,Equity Stock,Neoclouds,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+NBIS,Nebius,Equity Stock,Neoclouds,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+IREN,IREN,Equity Stock,Neoclouds,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+CEG,Constellation Energy,Equity Stock,Power,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+VST,Vistra,Equity Stock,Power,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+BE,Bloom Energy,Equity Stock,Power,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+XE,X-energy,Equity Stock,Nuclear,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+PLTR,Palantir,Equity Stock,Software,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+NOW,ServiceNow,Equity Stock,Software,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
+CRCL,Circle Internet,Equity Stock,Crypto,Up to date,2026-10-26,2026-10-26,,,2026-10-27T13:37+08:00
