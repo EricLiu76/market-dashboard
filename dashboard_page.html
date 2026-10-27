@@ -364,7 +364,7 @@
         <li><b>07:30, every day:</b> the Calendar.</li>
       </ul>
     </section>
-    <p class="mk-note">Pending: the market's latest close has not been posted yet, so the dashboard still shows the one before. Provisional: a preliminary close is shown, and the final close replaces it when posted. Weekly release: the series is published once a week, about a week behind. Update failed: the run could not update the market; the next run tries again. Each run picks up whatever has been posted by then. This page is rebuilt at every markets run.</p>
+    <p class="mk-note">Pending: the market's latest close has not been posted yet, so the dashboard still shows the one before. Provisional: a preliminary close is shown, and the final close replaces it when posted. Weekly release: the series is published once a week, so it can be up to a week behind. Update failed: the run could not update the market; the next run tries again. Each run picks up whatever has been posted by then. This page is rebuilt at every markets run.</p>
   </div>
 </div>
 
@@ -1408,7 +1408,7 @@
     if (rows.length && waiting.length) {
       const next = waiting.map((r) => r.next_run).filter(Boolean).sort()[0];
       lede.append(v(String(waiting.length)), ` of ${rows.length} markets waiting for an update` + (next ? '; next try ' : '.'));
-      if (next) lede.append(v(fmtRun(next)), '.');
+      if (next) lede.append(v(fmtRun(next).replace(/^(Today|Tomorrow)/, (w) => w.toLowerCase())), '.');
     } else if (rows.length) {
       lede.append('all ', v(String(rows.length)), ' markets show their latest close.');
     }
