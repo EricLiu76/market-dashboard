@@ -94,6 +94,20 @@
 .mk-tabs button[aria-selected="true"] { background: var(--color-fg); color: var(--color-bg); }
 .mk [hidden] { display: none !important; }
 
+/* Data Status */
+.st-table th { padding: var(--cds-pad-xs) var(--cds-pad-sm); color: var(--color-fg-muted); white-space: nowrap; }
+.st-table td.st-name { font-weight: var(--cds-font-weight-medium); }
+.st-table .st-tk { margin-left: .5em; color: var(--color-fg-muted); font-weight: 400; }
+.st-table td.st-note { white-space: normal; min-width: 16rem; text-align: left; color: var(--color-fg-muted); }
+.st-table td.st-none { text-align: left; color: var(--color-fg-muted); cursor: default; }
+.st-chip { display: inline-flex; align-items: center; gap: .45em; }
+.st-chip::before { content: ''; width: .6em; height: .6em; border-radius: 50%; background: var(--st, var(--color-fg-muted)); }
+.st-pending { --st: var(--color-warn); }
+.st-provisional { --st: var(--series-1); }
+.st-failed { --st: var(--color-bad); }
+.st-weekly { --st: var(--color-fg-muted); }
+.st-sched { margin: 0; padding-left: 1.2em; display: grid; gap: var(--cds-gap-xs); line-height: 1.5; }
+
 /* Settings */
 .mk-top-r { display: flex; align-items: center; gap: var(--cds-gap-sm); }
 .mk-icon { font: inherit; display: inline-grid; place-items: center; width: 2rem; height: 2rem; padding: 0; border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); background: transparent; color: var(--color-fg-muted); cursor: pointer; }
@@ -191,6 +205,7 @@
       <div class="mk-seg mk-tabs" role="tablist" aria-label="Pages">
         <button type="button" role="tab" id="tab-markets" data-tab="markets" aria-controls="markets">Markets</button>
         <button type="button" role="tab" id="tab-calendar" data-tab="calendar" aria-controls="calendar">Calendar</button>
+        <button type="button" role="tab" id="tab-status" data-tab="status" aria-controls="status">Data Status</button>
       </div>
       <button type="button" class="mk-icon" id="settings-open" aria-label="Settings" title="Settings" aria-haspopup="dialog">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h9M19 7h1M4 17h1M11 17h9"/><circle cx="16" cy="7" r="2.5"/><circle cx="8" cy="17" r="2.5"/></svg>
@@ -317,6 +332,40 @@
     </div>
     <p class="mk-note">Equity: an upcoming date shows (Confirmed) once the company has announced it, otherwise (Estimate); reported dates show (Confirmed). Consensus covers quarterly and fiscal-year revenue and adjusted EPS, and the beat or miss compares adjusted EPS with consensus. Credit: names under credit coverage; besides revenue and EPS, each has the consensus for its credit metric (net income, operating income or EBITDA), the beat or miss compares that metric, and release times are as the company announced them. Fiscal quarters read 2QFY26: quarter, then the fiscal year as the company names it (Japanese companies by the year it starts). Macro: US and France (FR) data releases (the actual as first published, against the consensus before the release, and the previous figure as revised at the time; Above or Below is not good or bad), FOMC meetings and rate decisions, speeches by the Fed Chair, Governors and New York Fed president, FOMC minutes, Beige Book, policy and political events (elections, budget votes), the US Treasury's refunding, budget and coupon auctions (high yield), EIA crude inventories, the Fed balance sheet, the EIA energy outlook and the USDA WASDE report; for France also the state budget balance and the annual public deficit. Labels start with the country code (US, FR). Macro events sit on their Singapore date, with New York or Paris time alongside; all-day events on their local date. Upcoming lists the next 7 days of Macro events; the calendar keeps them for a rolling year (the past 12 months, and FOMC meetings 12 months ahead). Times are Singapore time, with US daylight saving applied.</p>
   </div>
+
+  <div class="mk" id="status" role="tabpanel" aria-labelledby="tab-status" hidden>
+    <header class="mk-head">
+      <p class="mk-lede" id="st-lede"><span class="dash-skeleton">—</span></p>
+    </header>
+    <section class="mk-card" aria-labelledby="st-wait-title">
+      <h2 id="st-wait-title">Waiting for an update</h2>
+      <p class="mk-note">Markets whose latest close is not on the dashboard yet. Click a row to open its chart.</p>
+      <div class="mk-tablebox">
+        <table class="mk-table st-table" id="st-table" data-source="status">
+          <thead><tr>
+            <th>Market</th>
+            <th class="mk-opt">Section</th>
+            <th>Status</th>
+            <th>Shown</th>
+            <th>Expected</th>
+            <th>Next update run</th>
+            <th class="mk-opt">Note</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+    <section class="mk-card" aria-labelledby="st-sched-title">
+      <h2 id="st-sched-title">Update schedule (Singapore time)</h2>
+      <ul class="st-sched">
+        <li><b>07:30, Tuesday to Saturday:</b> markets data, with the previous weekday's closes.</li>
+        <li><b>10:00, Tuesday to Saturday:</b> catch-up run for closes not yet posted at 07:30.</li>
+        <li>Anything still missing after 10:00 is tried again at the next 07:30 run (after Saturday, on Tuesday).</li>
+        <li><b>07:30, every day:</b> the Calendar.</li>
+      </ul>
+    </section>
+    <p class="mk-note">Pending: the market's latest close has not been posted yet, so the dashboard still shows the one before. Provisional: a preliminary close is shown, and the final close replaces it when posted. Weekly release: the series is published once a week, about a week behind. Update failed: the run could not update the market; the next run tries again. Each run picks up whatever has been posted by then. This page is rebuilt at every markets run.</p>
+  </div>
 </div>
 
 <script>
@@ -359,23 +408,24 @@
 })();
 
 (() => {
-  // Page tabs: Markets and Calendar
+  // Page tabs: Markets, Calendar and Data Status
+  const PAGES = ['markets', 'calendar', 'status'];
   const tabs = [...document.querySelectorAll('.mk-tabs [data-tab]')];
   tabs.forEach((b) => b.addEventListener('click', () => {
     dash.setParams({ tab: b.dataset.tab });
     dash.setLink(b.dataset.tab);
   }));
-  // A link ending in #calendar opens the Calendar tab
-  if (location.hash === '#calendar' && dash.params().tab !== 'calendar') dash.setParams({ tab: 'calendar' });
+  // A link ending in #calendar or #status opens that tab
+  const linked = location.hash.slice(1);
+  if ((linked === 'calendar' || linked === 'status') && dash.params().tab !== linked) dash.setParams({ tab: linked });
   dash.onData(() => {
-    const tab = dash.params().tab === 'calendar' ? 'calendar' : 'markets';
+    const tab = PAGES.includes(dash.params().tab) ? dash.params().tab : 'markets';
     tabs.forEach((b) => {
       const on = b.dataset.tab === tab;
       b.setAttribute('aria-selected', String(on));
       b.tabIndex = on ? 0 : -1;
     });
-    document.getElementById('markets').hidden = tab !== 'markets';
-    document.getElementById('calendar').hidden = tab !== 'calendar';
+    PAGES.forEach((id) => { document.getElementById(id).hidden = tab !== id; });
   });
 })();
 </script>
@@ -1299,6 +1349,89 @@
     }
     scrollTo = null;
     drawSide(evs, p);
+  });
+})();
+</script>
+
+<script>
+(() => {
+  // Data Status tab: markets whose latest close is not on the dashboard yet, and the scheduled run that tries again
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  const CLS = { 'Pending': 'st-pending', 'Provisional': 'st-provisional', 'Weekly release': 'st-weekly', 'Update failed': 'st-failed' };
+  const ORDER = ['Update failed', 'Pending', 'Provisional', 'Weekly release'];
+  const TZ = 'Asia/Singapore';
+  const sgDay = (d) => d.toLocaleDateString('en-CA', { timeZone: TZ }); // YYYY-MM-DD in Singapore
+  const fmtDay = (iso) => iso
+    ? new Date(iso + 'T00:00:00Z').toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' })
+    : '—';
+  const hhmm = (d) => d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: TZ });
+  const fmtRun = (iso) => {
+    if (!iso) return '—';
+    const t = new Date(iso), day = sgDay(t);
+    const when = day === sgDay(new Date()) ? 'Today' : day === sgDay(new Date(Date.now() + 864e5)) ? 'Tomorrow'
+      : t.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', timeZone: TZ });
+    return `${when}, ${hhmm(t)} SGT` + (hhmm(t) === '10:00' ? ' (catch-up)' : '');
+  };
+  const fmtBuilt = (iso) => {
+    const t = new Date(iso);
+    return `${t.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: TZ })}, ${hhmm(t)} SGT`;
+  };
+
+  const lede = document.getElementById('st-lede');
+  const tbody = document.querySelector('#st-table tbody');
+  const openChart = (code) => {
+    dash.setParams({ tab: 'markets', open: code, cmp: null });
+    dash.setLink('markets');
+    setTimeout(() => { const d = document.getElementById('detail'); if (d) d.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 200);
+  };
+  tbody.addEventListener('click', (e) => { const tr = e.target.closest('tr[data-code]'); if (tr) openChart(tr.dataset.code); });
+  tbody.addEventListener('keydown', (e) => {
+    const tr = e.target.closest('tr[data-code]');
+    if (tr && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); openChart(tr.dataset.code); }
+  });
+
+  let drawn = null;
+  dash.onData(() => {
+    const s = dash.data('status');
+    if (s.status === 'loading' || s.data === drawn) return;
+    if (s.status !== 'ok') {
+      lede.textContent = 'The data status failed to load.';
+      tbody.replaceChildren();
+      return;
+    }
+    drawn = s.data;
+    const rows = s.data;
+    const waiting = rows.filter((r) => r.status && r.status !== 'Up to date')
+      .sort((a, b) => ORDER.indexOf(a.status) - ORDER.indexOf(b.status) || (a.next_run || '').localeCompare(b.next_run || ''));
+    const v = (text) => el('span', 'mk-v', text);
+    lede.replaceChildren(rows.length ? `Status at the ${fmtBuilt(rows[0].built)} run: ` : 'No status yet.');
+    if (rows.length && waiting.length) {
+      const next = waiting.map((r) => r.next_run).filter(Boolean).sort()[0];
+      lede.append(v(String(waiting.length)), ` of ${rows.length} markets waiting for an update` + (next ? '; next try ' : '.'));
+      if (next) lede.append(v(fmtRun(next)), '.');
+    } else if (rows.length) {
+      lede.append('all ', v(String(rows.length)), ' markets show their latest close.');
+    }
+    tbody.replaceChildren(...waiting.map((r) => {
+      const tr = el('tr');
+      tr.dataset.code = r.code;
+      tr.tabIndex = 0;
+      const name = el('td', 'st-name', r.name);
+      name.append(el('span', 'st-tk', r.code));
+      const st = el('td');
+      st.append(el('span', 'st-chip ' + (CLS[r.status] || ''), r.status));
+      tr.append(name, el('td', 'mk-opt', r.subtype ? `${r.type} · ${r.subtype}` : r.type), st,
+        el('td', '', fmtDay(r.shown_date)), el('td', '', fmtDay(r.expected_date)), el('td', '', fmtRun(r.next_run)),
+        el('td', 'st-note mk-opt', r.note));
+      return tr;
+    }));
+    if (!waiting.length) {
+      const td = el('td', 'st-none', 'Nothing is waiting: every market shows its latest close.');
+      td.colSpan = 7;
+      const tr = el('tr');
+      tr.append(td);
+      tbody.append(tr);
+    }
   });
 })();
 </script>

@@ -9,6 +9,7 @@
     snapshot: { url: 'data/market_snapshot.csv' },
     master: { url: 'data/master_data_file.csv', parse: wideToLong },
     earnings: { url: 'data/earnings_calendar.csv' },
+    status: { url: 'data/data_status.csv' },
   };
   // Filter defaults, as in the claude.ai dashboard
   const DEFAULTS = { cmp: null, drange: null, ma200: true, ma50: true, open: null, range: '6M', sort: 'default', spark200: false };
