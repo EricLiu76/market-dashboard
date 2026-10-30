@@ -343,7 +343,7 @@
         </section>
       </aside>
     </div>
-    <p class="mk-note">Equity: an upcoming date shows (Confirmed) once the company has announced it, otherwise (Estimate); reported dates show (Confirmed). Consensus covers quarterly and fiscal-year revenue and adjusted EPS, and the beat or miss compares adjusted EPS with consensus. Credit: names under credit coverage; besides revenue and EPS, each has the consensus for its credit metric (net income, operating income or EBITDA), the beat or miss compares that metric, and release times are as the company announced them. Fiscal quarters read 2QFY26: quarter, then the fiscal year as the company names it (Japanese companies by the year it starts). Macro: US, France (FR), Australia (AU) and Japan (JP) data releases (the actual as first published, against the consensus before the release, and the previous figure as revised at the time; Above or Below is not good or bad), FOMC meetings and rate decisions, speeches by the Fed Chair, Governors and New York Fed president, FOMC minutes, Beige Book, policy and political events (elections, budget votes), the US Treasury's refunding, budget and coupon auctions (high yield), EIA crude inventories, the Fed balance sheet, the EIA energy outlook and the USDA WASDE report; for France also the state budget balance and the annual public deficit; RBA and BoJ rate decisions, minutes (and the BoJ's Summary of Opinions), and speeches by their Governors and Deputy Governors; Australia's Federal Budget and mid-year update, and Japan's budget approval and passage. Labels start with the country code (US, FR, AU, JP). Macro events sit on their Singapore date, with New York, Paris, Sydney or Tokyo time alongside; all-day events on their local date. Upcoming lists the next 7 days of Macro events; the calendar keeps them for a rolling year (the past 12 months, and FOMC, RBA and BoJ meetings 12 months ahead). Times are Singapore time, with US daylight saving applied.</p>
+    <p class="mk-note">Equity: an upcoming date shows (Confirmed) once the company has announced it, otherwise (Estimate); reported dates show (Confirmed). Consensus covers quarterly and fiscal-year revenue and adjusted EPS, and the beat or miss compares adjusted EPS with consensus. Credit: names under credit coverage; besides revenue and EPS, each has the consensus for its credit metric (net income, operating income or EBITDA), the beat or miss compares that metric, and release times are as the company announced them. Fiscal quarters read 2QFY26: quarter, then the fiscal year as the company names it (Japanese companies by the year it starts). Macro: US, France (FR), Australia (AU), Japan (JP), New Zealand (NZ), India (IN), Korea (KR), China (CN) and Hong Kong (HK) data releases (the actual as first published, against the consensus before the release, and the previous figure as revised at the time; Above or Below is not good or bad), FOMC meetings and rate decisions, speeches by the Fed Chair, Governors and New York Fed president, FOMC minutes, Beige Book, policy and political events (elections, budget votes), the US Treasury's refunding, budget and coupon auctions (high yield), EIA crude inventories, the Fed balance sheet, the EIA energy outlook and the USDA WASDE report; for France also the state budget balance and the annual public deficit; RBA, BoJ, RBNZ, RBI and BoK rate decisions, minutes (and the BoJ's Summary of Opinions), and speeches by their Governors (and, for the RBA and BoJ, Deputy Governors); China's Loan Prime Rates, credit data and political meetings (NPC, CPPCC, Politburo, plenums); the HKMA base rate, set the morning after each FOMC decision; budgets and fiscal updates (Australia, Japan, New Zealand, India) and elections. Labels start with the country code (US, FR, AU, JP, NZ, IN, KR, CN, HK). Macro events sit on their Singapore date, with the local time alongside; all-day events on their local date. Upcoming lists the next 7 days of Macro events; the calendar keeps them for a rolling year (the past 12 months, and central bank meetings 12 months ahead). Times are Singapore time, with US daylight saving applied.</p>
   </div>
 
   <div class="mk" id="status" role="tabpanel" aria-labelledby="tab-status" hidden>
@@ -1041,7 +1041,10 @@
     (e[f] >= 0 ? 'Beat ' : 'Miss ') + sign(e[f]) + Math.abs(e[f]).toFixed(1) + '%'), f, id);
   const credit = (e) => e.category === 'Credit';
   const macro = (e) => e.category === 'Macro';
-  // A macro figure by its unit: pct 3.4%, rate 4.00%, yld 4.291%, k 29K, m 7.079M, bbl +0.9M bbl, idx 54.5, usdbn USD−27bn, usdtn USD6.754tn
+  // Where a central bank's decision date applies when its time is not listed yet (else New York, the FOMC)
+  const DECISION_CITY = { Japan: 'Tokyo', Korea: 'Seoul', India: 'Mumbai', 'New Zealand': 'Wellington', Australia: 'Sydney' };
+  // A macro figure by its unit: pct 3.4%, rate 4.00%, yld 4.291%, k 29K, m 7.079M, bbl +0.9M bbl, idx 54.5, usdbn USD−27bn, usdtn USD6.754tn,
+  // usdbn2 USD−30.21bn, cnybn CNY1,080bn, inrbn INR−5,731bn
   const fMac = (v, u) => {
     const a = Math.abs(v), mi = v < 0 ? '−' : '';
     const n = (d) => a.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
@@ -1054,6 +1057,9 @@
     if (u === 'usdbn') return 'USD' + mi + n(0) + 'bn';
     if (u === 'usdtn') return 'USD' + mi + n(3) + 'tn';
     if (u === 'eurbn') return 'EUR' + mi + n(1) + 'bn';
+    if (u === 'usdbn2') return 'USD' + mi + n(2) + 'bn';
+    if (u === 'cnybn') return 'CNY' + mi + n(0) + 'bn';
+    if (u === 'inrbn') return 'INR' + mi + n(0) + 'bn';
     return mi + n(1);
   };
   // Actual against consensus, without a good / bad colour: Above, Below or In line
@@ -1080,7 +1086,7 @@
   const sessWindow = (s, d) => { if (s[0] === 'ASIA' || s[0] === 'MACRO') return 'times in SGT'; if (s.length < 3) return ''; const sh = 8 - etOffset(d); return hm(s[2] + sh, s[3]) + '–' + hm(s[4] + sh, s[5]) + ' SGT'; };
   const timeText = (e) => {
     const sh = 8 - etOffset(e.date);
-    if (macro(e)) return e.time_sgt ? [fDow(e.date) + ' ' + e.time_sgt, 'SGT · ' + e.time_local] : [null, / rate decision$/.test(e.name) ? 'Time not listed yet (' + (e.country === 'Japan' ? 'Tokyo' : 'New York') + ' date)' : 'All day (local date)'];
+    if (macro(e)) return e.time_sgt ? [fDow(e.date) + ' ' + e.time_sgt, 'SGT · ' + e.time_local] : [null, / rate decision$/.test(e.name) ? 'Time not listed yet (' + (DECISION_CITY[e.country] || 'New York') + ' date)' : 'All day (local date)'];
     if (e.session === 'ASIA' && e.time_sgt) return [fDow(e.date) + ' ' + e.time_sgt, 'SGT · ' + e.time_local + ' local'];
     if (e.session === 'AMC') return [fDow(addDays(e.date, Math.floor((16 + sh) / 24))) + ' ' + hm(16 + sh) + '+', 'SGT · after the 16:00 ET close'];
     if (e.session === 'BMO') return [fDow(e.date) + ' by ' + hm(9 + sh, 30), 'SGT · before the 09:30 ET open'];
