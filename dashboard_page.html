@@ -1408,7 +1408,9 @@
     countryBox.hidden = (p.cat && !COS.includes(p.cat)) || !eq.length;
     const countries = d3.groups(eq, cty).map(([c, es]) => [c, d3.min(es, (e) => +e.country_order || 999)])
       .sort((a, b) => a[1] - b[1] || a[0].localeCompare(b[0]));
-    segButtons(countryBox, [[null, 'All countries'], ...countries.map(([c]) => [c, c])], p.country, (v) => dash.setParams({ cn: v }));
+    // Short button labels (user, 2026-10-30); the cn parameter keeps the full name
+    const SHORT = { 'United States': 'US', 'United Kingdom': 'UK' };
+    segButtons(countryBox, [[null, 'All countries'], ...countries.map(([c]) => [c, SHORT[c] || c])], p.country, (v) => dash.setParams({ cn: v }));
 
     const dayBox = document.getElementById('cal-day');
     document.getElementById('cal-month').hidden = p.view !== 'month';
