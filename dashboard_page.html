@@ -1016,7 +1016,8 @@
   const root = document.getElementById('calendar');
   const NUMS = ['rev_actual_bn', 'eps_gaap', 'eps_adj_actual', 'eps_surprise_pct', 'rev_cons_bn', 'rev_cons_low_bn', 'rev_cons_high_bn',
     'rev_cons_n', 'eps_cons', 'eps_cons_low', 'eps_cons_high', 'eps_cons_n', 'fy_eps_cons', 'fy_eps_low', 'fy_eps_high', 'fy_eps_n',
-    'fy_rev_cons_bn', 'fy_rev_low_bn', 'fy_rev_high_bn', 'fy_rev_n', 'metric_actual_bn', 'metric_cons_bn', 'metric_surprise_pct', 'fy_metric_cons_bn'];
+    'fy_rev_cons_bn', 'fy_rev_low_bn', 'fy_rev_high_bn', 'fy_rev_n', 'metric_actual_bn', 'metric_cons_bn', 'metric_surprise_pct', 'fy_metric_cons_bn',
+    'fy_metric_actual_bn', 'fy_metric_surprise_pct'];
   const DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   const parse = d3.utcParse('%Y-%m-%d');
   const iso = (d) => d.toISOString().slice(0, 10);
@@ -1224,6 +1225,9 @@
 
     const dl = el('dl', 'cal-kv');
     const pe = mark(el('span', null, fYM(parse(e.period_end + '-01'))), 'period_end', id);
+    const span = /^\dH/.test(e.fiscal_period) ? 'Half year' : 'Quarter';
+    // "Net income" -> "net income" mid-label; EBITDA stays as it is
+    const ml = /^[A-Z][a-z]/.test(e.metric_label) ? e.metric_label[0].toLowerCase() + e.metric_label.slice(1) : e.metric_label;
     if (e.status === 'Reported') {
       if (e.rev_actual_bn != null) kv(dl, 'Revenue', mark(el('span', null, fBn(e.rev_actual_bn, e.currency)), 'rev_actual_bn', id));
       if (e.metric_actual_bn != null) {
@@ -1232,6 +1236,12 @@
         if (e.metric_surprise_pct != null) subs.push(beat(e, id, 'metric_surprise_pct'));
         kv(dl, e.metric_label, mark(el('span', null, fBn(e.metric_actual_bn, e.currency)), 'metric_actual_bn', id), subs);
       }
+      if (e.fy_metric_actual_bn != null) {  // second half: the full year alongside (user, 2026-11-03)
+        const subs = [];
+        if (e.fy_metric_cons_bn != null) subs.push('vs consensus ', mark(el('span', null, fBn(e.fy_metric_cons_bn, e.currency)), 'fy_metric_cons_bn', id), ' ');
+        if (e.fy_metric_surprise_pct != null) subs.push(beat(e, id, 'fy_metric_surprise_pct'));
+        kv(dl, e.fy_label + ' ' + ml, mark(el('span', null, fBn(e.fy_metric_actual_bn, e.currency)), 'fy_metric_actual_bn', id), subs);
+      }
       if (e.eps_adj_actual != null) {
         const subs = [];
         if (e.eps_cons != null) subs.push('vs consensus ', mark(el('span', null, fEps(e.eps_cons)), 'eps_cons', id), ' ');
@@ -1239,7 +1249,7 @@
         kv(dl, credit(e) ? 'EPS' : 'Adjusted EPS', mark(el('span', null, fEps(e.eps_adj_actual)), 'eps_adj_actual', id), subs);
       }
       if (e.eps_gaap != null) kv(dl, 'GAAP diluted EPS', mark(el('span', null, fEps(e.eps_gaap)), 'eps_gaap', id));
-      kv(dl, 'Quarter ended', pe);
+      kv(dl, span + ' ended', pe);
     } else {
       const adj = credit(e) ? '' : ' (adjusted)';
       if (e.rev_cons_bn != null) kv(dl, 'Revenue consensus', mark(el('span', null, fBn(e.rev_cons_bn, e.currency)), 'rev_cons_bn', id),
@@ -1249,12 +1259,10 @@
         consSubs(e, id, 'eps_cons_low', 'eps_cons_high', 'eps_cons_n', fEps));
       if (e.fy_rev_cons_bn != null) kv(dl, e.fy_label + ' revenue consensus', mark(el('span', null, fBn(e.fy_rev_cons_bn, e.currency)), 'fy_rev_cons_bn', id),
         consSubs(e, id, 'fy_rev_low_bn', 'fy_rev_high_bn', 'fy_rev_n', fBn));
-      // "Net income" -> "net income" mid-label; EBITDA stays as it is
-      const ml = /^[A-Z][a-z]/.test(e.metric_label) ? e.metric_label[0].toLowerCase() + e.metric_label.slice(1) : e.metric_label;
       if (e.fy_metric_cons_bn != null) kv(dl, e.fy_label + ' ' + ml + ' consensus', mark(el('span', null, fBn(e.fy_metric_cons_bn, e.currency)), 'fy_metric_cons_bn', id));
       if (e.fy_eps_cons != null) kv(dl, e.fy_label + ' EPS consensus' + adj, mark(el('span', null, fEps(e.fy_eps_cons)), 'fy_eps_cons', id),
         consSubs(e, id, 'fy_eps_low', 'fy_eps_high', 'fy_eps_n', fEps));
-      kv(dl, 'Quarter ending', pe);
+      kv(dl, span + ' ending', pe);
     }
     c.append(top, time, dl);
     if (e.note && e.status !== 'Reported') c.append(mark(el('p', 'mk-note', e.note), 'note', id));
