@@ -467,17 +467,21 @@
   const fmtShort = d3.utcFormat('%-d %b');
   const sign = (v) => (v > 0 ? '+' : v < 0 ? '−' : '');
   const isBp = (r) => r.chg_type === 'bp';
+  // Basis points in one unit of the row's values: yields are in percent (100), credit spreads are kept in bp (1)
+  const bpPer = (r) => (r.unit === 'bp' ? 1 : 100);
   const fmtChg = (r, v) => v == null ? '—' : isBp(r) ? sign(v) + Math.abs(v).toFixed(1) + 'bp' : sign(v) + Math.abs(v).toFixed(2) + '%';
   const fmtLast = (r, v = r.last) => {
     if (v == null) return '—';
+    // Spreads in bp: whole basis points (93bp), one decimal for averages and axis steps between them (92.6bp)
+    if (r.unit === 'bp') return d3.format(Math.abs(v - Math.round(v)) < 0.05 ? ',.0f' : ',.1f')(v) + 'bp';
     if (isBp(r)) return v.toFixed(3) + '%';
     if (v >= 100000) return d3.format(',.0f')(v);
     if (v >= 10) return d3.format(',.2f')(v);
     return v.toFixed(4);
   };
   const tone = (r, v) => (isBp(r) || !v ? '' : v > 0 ? 'mk-up' : 'mk-down');
-  // Change from base to v in the row's own terms: bp for yields, percent otherwise
-  const move = (r, v, base) => (isBp(r) ? (v - base) * 100 : (v / base - 1) * 100);
+  // Change from base to v in the row's own terms: bp for yields and spreads, percent otherwise
+  const move = (r, v, base) => (isBp(r) ? (v - base) * bpPer(r) : (v / base - 1) * 100);
   const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
   const mark = (e, field, code) => { e.setAttribute('data-source', 'snapshot'); e.setAttribute('data-field', field); e.setAttribute('data-where', where(code)); return e; };
   const safeId = (s) => s.replace(/[^A-Za-z0-9]/g, '');
@@ -890,9 +894,9 @@
       const oarr = map.get(other.code) || [];
       const oBase = onOrBefore(oarr, start);
       if (oBase) cmpPts = oarr.filter((d) => d.date >= oBase.date && d.date <= end)
-        // Two yields are lined up by level (bp moves); anything else is rebased by ratio
+        // Two yields or spreads are lined up by level (bp moves, in r's unit); anything else is rebased by ratio
         .map((d) => ({ date: d.date < start ? start : d.date, raw: d.close, pct: move(other, d.close, oBase.close),
-          v: isBp(r) && isBp(other) ? data[0].close + d.close - oBase.close : d.close * data[0].close / oBase.close }));
+          v: isBp(r) && isBp(other) ? data[0].close + (d.close - oBase.close) * bpPer(other) / bpPer(r) : d.close * data[0].close / oBase.close }));
     }
     const vals = data.flatMap((d) => [d.close, p.ma50 ? d.ma50 : null, p.ma200 ? d.ma200 : null]).concat(cmpPts.map((d) => d.v)).filter((v) => v != null);
     const y = d3.scaleLinear(d3.extent(vals), [H - mb, mt]).nice();
